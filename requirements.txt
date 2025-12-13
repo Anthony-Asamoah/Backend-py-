@@ -7,6 +7,7 @@ fastapi-limiter
 humanize
 inflect
 moviepy
+passlib
 pendulum
 phonenumbers
 pillow

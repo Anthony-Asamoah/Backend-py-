@@ -1,0 +1,17 @@
+apscheduler
+boto3
+django
+django-storages
+fastapi
+fastapi-limiter
+humanize
+inflect
+moviepy
+pendulum
+phonenumbers
+pillow
+pillow-avif-plugin
+psycopg2-binary
+python-decouple
+tenacity
+uvicorn

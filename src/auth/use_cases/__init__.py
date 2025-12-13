@@ -1,0 +1,87 @@
+from typing import Annotated
+
+from fastapi import BackgroundTasks, Depends
+
+from main.utils.base_classes import BaseService
+from .activate_account import activate_account
+from .change_password import change_password
+from .create_account import create_account
+from .delete_account import delete_user_account
+from .get_account import get_user_account
+from .list_accounts import list_user_accounts
+from .login import login
+from .refresh_token import get_new_access_tokens
+from ..models import UserAccount
+from ..schema import (
+    UserAccountCreate, UserAccountOut, UserAccountLogin,
+    RefreshToken, Token,
+    ResetPassword
+)
+from ..utils import get_current_user
+
+
+class UserAccountService(BaseService[UserAccount, UserAccountOut]):
+    """Methods to handle user account domain operations."""
+
+    async def login(self, payload: UserAccountLogin):
+        """Authenticate an account."""
+        return await login(self, payload)
+
+    async def refresh(self, payload: RefreshToken):
+        """Refresh a set of tokens."""
+        return await get_new_access_tokens(self, payload)
+
+    async def create(self, payload: UserAccountCreate, tasks: BackgroundTasks):
+        """Create/register a new account."""
+        return await create_account(self, payload, tasks)
+
+    async def activate(
+            self,
+            payload: Token,
+            tasks: BackgroundTasks,
+    ) -> None:
+        """activate an account."""
+        await activate_account(self, payload, tasks)
+
+    async def change_password(
+            self, *,
+            payload: ResetPassword,
+            tasks: BackgroundTasks,
+            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+    ) -> None:
+        """activate an account."""
+        await change_password(self, str(current_user.id), payload, tasks)
+
+    async def read(
+            self, *,
+            search: str = None,
+            identifier: str = None,
+            is_deleted: bool = None,
+            skip: int = 0,
+            limit: int = 100,
+            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+    ) -> list:
+        """Get a paginated list of user accounts."""
+        return await list_user_accounts(self, current_user, search, identifier, is_deleted, skip, limit)
+
+    async def delete(
+            self,
+            id: str,
+            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+    ) -> None:
+        """Delete by user ID."""
+        return await delete_user_account(self, id)
+
+    async def get(
+            self,
+            identifier: str,
+            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+    ):
+        """Get user account by user ID."""
+        return await get_user_account(self, identifier)
+
+
+user_account_service = UserAccountService(
+    manager=UserAccount.objects,
+    out_schema=UserAccountOut
+)

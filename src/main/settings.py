@@ -63,13 +63,14 @@ TIME_WINDOW = config('TIME_WINDOW', cast=int, default=3)  # Per 3 seconds
 
 # Auth & JWT
 AUTH_USER_MODEL = 'auth.UserAccount'
-ACCESS_TOKEN_EXPIRES_IN_MINUTES: int = 15 * 2400
-REFRESH_TOKEN_EXPIRES_IN_MINUTES: int = 30
+PASSWORD_RESET_TOKEN_EXPIRE_HOURS = config('PASSWORD_RESET_TOKEN_EXPIRE_HOURS', cast=int, default=24)
+ACCESS_TOKEN_EXPIRES_IN_MINUTES = config('ACCESS_TOKEN_EXPIRES_IN_MINUTES', cast=int, default=60)
+REFRESH_TOKEN_EXPIRES_IN_MINUTES = config('REFRESH_TOKEN_EXPIRES_IN_MINUTES', cast=int, default=60 * 24)
 ALGORITHM: str = "HS256"
-JWT_SECRET_KEY: str = config('JWT_SECRET_KEY', cast=str, default='secret')  # todo: add to .env
-JWT_PRIVATE_KEY: str = config('JWT_PRIVATE_KEY', cast=str, default='private_secret')  # todo: add to .env
-JWT_PUBLIC_KEY: str = config('JWT_PUBLIC_KEY', cast=str, default='public_secret')  # todo: add to .env
-JWT_REFRESH_KEY: str = config('JWT_REFRESH_KEY', cast=str, default='refresh_secret')  # todo: add to .env
+JWT_SECRET_KEY: str = config('JWT_SECRET_KEY', cast=str, default='secret')
+JWT_PRIVATE_KEY: str = config('JWT_PRIVATE_KEY', cast=str, default='private_secret')
+JWT_PUBLIC_KEY: str = config('JWT_PUBLIC_KEY', cast=str, default='public_secret')
+JWT_REFRESH_KEY: str = config('JWT_REFRESH_KEY', cast=str, default='refresh_secret')
 
 # Cache Configuration
 CACHE_SERVICE = config('CACHE_SERVICE', cast=str, default='inmem')  # 'inmem' or 'redis'

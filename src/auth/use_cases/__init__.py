@@ -14,11 +14,13 @@ from .list_accounts import list_accounts
 from .login import login
 from .logout import logout
 from .refresh_token import get_new_access_tokens
+from .reset_password import reset_password
+from .reset_password_request import reset_password_request
 from ..models import UserAccount
 from ..schema import (
     UserAccountCreate, UserAccountOut, UserAccountLogin,
     RefreshToken, Token,
-    ResetPassword
+    ChangePassword, ResetPassword
 )
 from ..utils import get_current_user
 
@@ -54,12 +56,28 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
 
     async def change_password(
             self, *,
-            payload: ResetPassword,
+            payload: ChangePassword,
             tasks: BackgroundTasks,
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
     ) -> None:
-        """activate an account."""
+        """change account password."""
         await change_password(self, str(current_user.id), payload, tasks)
+
+    async def reset_password_request(
+            self, *,
+            identifier: str,
+            tasks: BackgroundTasks,
+    ) -> None:
+        """activate an account."""
+        await reset_password_request(self, identifier, tasks)
+
+    async def reset_password(
+            self, *,
+            payload: ResetPassword,
+            tasks: BackgroundTasks,
+    ) -> None:
+        """activate an account."""
+        await reset_password(self, payload, tasks)
 
     async def read(
             self, *,

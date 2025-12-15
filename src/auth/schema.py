@@ -64,13 +64,8 @@ class UserAccountLoginOut(UserAccountTokens):
     user_info: Optional[UserInfoOut] = None
 
 
-class ResetPassword(BaseModel):
+class ChangePassword(BaseModel):
     password: RequiredStr
 
-
-class ResetPasswordEmail(ResetPassword):
-    email: EmailStr
-
-
-class ResetPasswordPhoneNumber(ResetPassword):
-    phone_number: PhoneNumber
+class ResetPassword(ChangePassword):
+    token: str

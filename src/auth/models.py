@@ -27,3 +27,12 @@ class UserAccount(BaseModel):
 class RevokedToken(BaseModel):
     token = models.TextField(db_index=True, unique=True)
     expires_on = models.DateTimeField()
+
+
+class PasswordResetToken(BaseModel):
+    reset_password_token = models.TextField(db_index=True, unique=True)
+    expires_on = models.DateTimeField()
+    user_account = models.ForeignKey(UserAccount, on_delete=models.CASCADE, related_name='password_reset_tokens')
+
+    def __str__(self):
+        return f'Reset pwd token for user {self.user_account.identifier}'

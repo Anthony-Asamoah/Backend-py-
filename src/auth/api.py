@@ -34,6 +34,16 @@ user_account_router.post(
 )(user_account_service.change_password)
 
 user_account_router.post(
+    "/reset-password-request",
+    status_code=204,
+)(user_account_service.reset_password_request)
+
+user_account_router.post(
+    "/reset-password",
+    status_code=204,
+)(user_account_service.reset_password)
+
+user_account_router.post(
     '',
     response_model=UserAccountOut,
     status_code=201,

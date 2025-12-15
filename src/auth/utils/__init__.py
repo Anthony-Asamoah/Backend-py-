@@ -5,9 +5,11 @@ __all__ = [
     "create_refresh_token",
     "validate_refresh_token",
     "detect_identifier_type",
+    "create_reset_password_token",
 ]
 
 from .authenticate_account import authenticate_account
+from .create_reset_password_token import create_reset_password_token
 from .create_token import create_access_token, create_refresh_token
 from .detect_identifier_type import detect_identifier_type
 from .get_current_user import get_current_user

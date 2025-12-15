@@ -19,7 +19,7 @@ def detect_identifier_type(identifier: str) -> IdentifierChoices:
     Raises:
         ValueError: If identifier is neither valid email nor phone number
     """
-    # Try email first (more common for web apps)
+    # Try email first
     try:
         validate_email(identifier)
         return IdentifierChoices.EMAIL

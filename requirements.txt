@@ -1,4 +1,5 @@
 apscheduler
+argon2_cffi
 boto3
 django
 django-storages
@@ -19,5 +20,6 @@ pydantic[email]
 python-decouple
 python-jose[cryptography]
 python-multipart
+redis[hiredis]>=5.0.0
 tenacity
 uvicorn

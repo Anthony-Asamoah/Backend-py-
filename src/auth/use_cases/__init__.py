@@ -1,15 +1,18 @@
 from typing import Annotated
 
 from fastapi import BackgroundTasks, Depends
+from fastapi.security import HTTPAuthorizationCredentials
 
+from main import settings
 from main.utils.base_classes import BaseService
 from .activate_account import activate_account
 from .change_password import change_password
 from .create_account import create_account
-from .delete_account import delete_user_account
-from .get_account import get_user_account
-from .list_accounts import list_user_accounts
+from .delete_account import delete_account
+from .get_account import get_account
+from .list_accounts import list_accounts
 from .login import login
+from .logout import logout
 from .refresh_token import get_new_access_tokens
 from ..models import UserAccount
 from ..schema import (
@@ -26,6 +29,12 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
     async def login(self, payload: UserAccountLogin):
         """Authenticate an account."""
         return await login(self, payload)
+
+    async def logout(self, credentials: Annotated[
+        HTTPAuthorizationCredentials, Depends(settings.AUTH_SECURITY_SCHEME)
+    ]):
+        """Expire a session."""
+        return await logout(self, credentials.credentials)
 
     async def refresh(self, payload: RefreshToken):
         """Refresh a set of tokens."""
@@ -62,7 +71,7 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
     ) -> list:
         """Get a paginated list of user accounts."""
-        return await list_user_accounts(self, current_user, search, identifier, is_deleted, skip, limit)
+        return await list_accounts(self, current_user, search, identifier, is_deleted, skip, limit)
 
     async def delete(
             self,
@@ -70,7 +79,7 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
     ) -> None:
         """Delete by user ID."""
-        return await delete_user_account(self, id)
+        return await delete_account(self, id)
 
     async def get(
             self,
@@ -78,7 +87,7 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
     ):
         """Get user account by user ID."""
-        return await get_user_account(self, identifier)
+        return await get_account(self, identifier)
 
 
 user_account_service = UserAccountService(

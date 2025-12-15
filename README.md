@@ -13,6 +13,7 @@ A modern backend template that combines Django's battle-tested ORM with FastAPI'
 - **Complete Authentication**: JWT-based auth with registration, login, token refresh, and password management
 - **User Profile Management**: Comprehensive user information and profile handling
 - **Media Management**: File upload/download with streaming support, thumbnail generation, and multiple storage backends (Local, AWS S3, Google Cloud)
+- **Caching Service**: Flexible caching with in-memory (development) and Redis (production) support
 - **Rate Limiting**: Built-in request throttling to protect your API
 - **Background Jobs**: APScheduler integration for scheduled tasks
 - **Clean Architecture**: Service layer pattern with dependency injection
@@ -133,6 +134,16 @@ See `.env.example` for all available configuration options. Key settings include
 **Rate Limiting**
 - `RATE_LIMIT`: Maximum requests per time window (default: 10)
 - `TIME_WINDOW`: Time window in seconds (default: 3)
+
+**Caching**
+- `CACHE_SERVICE`: Cache backend - `inmem` (default, in-memory) or `redis`
+- `REDIS_HOST`: Redis server host (default: localhost)
+- `REDIS_PORT`: Redis server port (default: 6379)
+- `REDIS_DB`: Redis database number (default: 0)
+- `REDIS_PASSWORD`: Redis password (leave empty if no auth)
+- `REDIS_MAX_CONNECTIONS`: Redis connection pool size (default: 10)
+
+**Note**: In-memory caching is suitable for development and single-instance deployments. For production with multiple instances or persistent caching needs, use Redis.
 
 **Storage Backends**
 - `STORAGE_TYPE`: `LOCAL`, `S3`, or `GCP`

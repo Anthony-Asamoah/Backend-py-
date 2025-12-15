@@ -2,7 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from fastapi import HTTPException, BackgroundTasks
 
 from auth.schema import ResetPassword
-from auth.utils.authenticate_user import Hasher
+from auth.utils.password_hasher import Hasher
 
 
 async def change_password(cls, id: str, payload: ResetPassword, background_tasks: BackgroundTasks = None) -> None:

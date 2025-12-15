@@ -71,6 +71,20 @@ JWT_PRIVATE_KEY: str = config('JWT_PRIVATE_KEY', cast=str, default='private_secr
 JWT_PUBLIC_KEY: str = config('JWT_PUBLIC_KEY', cast=str, default='public_secret')  # todo: add to .env
 JWT_REFRESH_KEY: str = config('JWT_REFRESH_KEY', cast=str, default='refresh_secret')  # todo: add to .env
 
+# Cache Configuration
+CACHE_SERVICE = config('CACHE_SERVICE', cast=str, default='inmem')  # 'inmem' or 'redis'
+DEFAULT_CACHE_STORES = [
+    'revoked_token'
+]
+# Redis Configuration (only used if CACHE_SERVICE='redis')
+REDIS_HOST = config('REDIS_HOST', cast=str, default='localhost')
+REDIS_PORT = config('REDIS_PORT', cast=int, default=6379)
+REDIS_DB = config('REDIS_DB', cast=int, default=0)
+REDIS_PASSWORD = config('REDIS_PASSWORD', cast=str, default='')
+REDIS_MAX_CONNECTIONS = config('REDIS_MAX_CONNECTIONS', cast=int, default=10)
+REDIS_SOCKET_TIMEOUT = config('REDIS_SOCKET_TIMEOUT', cast=int, default=5)
+REDIS_CONNECT_TIMEOUT = config('REDIS_CONNECT_TIMEOUT', cast=int, default=5)
+
 # STORAGE
 STORAGE_TYPE = config('STORAGE_BACKEND', cast=str, default='LOCAL').upper()
 

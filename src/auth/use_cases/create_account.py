@@ -4,7 +4,7 @@ from fastapi import BackgroundTasks, HTTPException
 
 from auth.schema import UserAccountCreate, IdentifierChoices
 from auth.utils import detect_identifier_type
-from auth.utils.authenticate_user import Hasher
+from auth.utils.password_hasher import Hasher
 from main.utils.logger import log
 from main.utils.validators import validate_phone_number
 from user_info.use_cases import user_info_service

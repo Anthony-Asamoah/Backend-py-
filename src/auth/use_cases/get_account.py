@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from main.utils.logger import log
 
 
-async def get_user_account(self, identifier: str):
+async def get_account(self, identifier: str):
     log.debug(f'init get user account with id: {identifier}')
 
     try:

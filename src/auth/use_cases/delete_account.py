@@ -4,7 +4,7 @@ from fastapi import HTTPException
 from main.utils.logger import log
 
 
-async def delete_user_account(self, id: str) -> None:
+async def delete_account(self, id: str) -> None:
     log.debug(f'init delete user account {id}')
 
     try:

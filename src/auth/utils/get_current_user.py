@@ -4,7 +4,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 
+from auth.models import RevokedToken
 from auth.schema import UserAccountOut
+from auth.utils.authorize_account import authorize_account
 from main import settings
 
 credentials_exception = HTTPException(
@@ -16,8 +18,7 @@ credentials_exception = HTTPException(
 
 async def get_current_user(
         credentials: Annotated[
-            HTTPAuthorizationCredentials,
-            Depends(settings.AUTH_SECURITY_SCHEME)
+            HTTPAuthorizationCredentials, Depends(settings.AUTH_SECURITY_SCHEME)
         ]
 ) -> UserAccountOut:
     token = credentials.credentials
@@ -28,8 +29,14 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
 
+    # get revoked tokens
+    is_revoked = await RevokedToken.objects.filter(token=token).afirst()
+    if is_revoked: raise credentials_exception
+
+    # retrieve user account
     from auth.use_cases import user_account_service
     user = await user_account_service.repo.filter(identifier=identifier).afirst()
-    if user is None: raise credentials_exception
+    is_authorized = await authorize_account(user)
+    if not is_authorized: raise credentials_exception
 
     return user

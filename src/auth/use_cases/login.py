@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from pydantic_core import PydanticCustomError
 
 from auth.schema import UserAccountLogin, UserAccountLoginOut
-from auth.utils import authenticate_user, create_access_token, create_refresh_token, detect_identifier_type
+from auth.utils import authenticate_account, create_access_token, create_refresh_token, detect_identifier_type
 from main.utils.logger import log
 from user_info.use_cases import user_info_service
 
@@ -27,7 +27,7 @@ async def login(cls, payload: UserAccountLogin) -> UserAccountLoginOut:
             # if account not found by identifier, try finding by profile id
             account = await cls.repo.filter(id=profile.id).afirst()
 
-        is_authenticated = await authenticate_user(account, payload.password)
+        is_authenticated = await authenticate_account(account, payload.password)
         if not is_authenticated: raise HTTPException(status_code=400, detail=msg)
 
         # get profile

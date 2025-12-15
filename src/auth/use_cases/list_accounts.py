@@ -5,7 +5,7 @@ from auth.schema import UserAccountOut
 from main.utils.logger import log
 
 
-async def list_user_accounts(
+async def list_accounts(
         cls,
         current_user: UserAccountOut,
         search: str = None,

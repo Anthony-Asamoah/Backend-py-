@@ -13,6 +13,11 @@ user_account_router.post(
 )(user_account_service.login)
 
 user_account_router.post(
+    '/logout',
+    status_code=204,
+)(user_account_service.logout)
+
+user_account_router.post(
     "/refresh",
     response_model=UserAccountTokens,
     status_code=200,

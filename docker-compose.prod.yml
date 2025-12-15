@@ -1,0 +1,133 @@
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: fastdjango_db_prod
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    expose:
+      - "${DB_PORT:-5432}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    networks:
+      - fastdjango_network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: fastdjango_web_prod
+    expose:
+      - ${APP_PORT:-80}
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db  # Override for Docker networking
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Only mount media for persistent storage
+      - media_data_prod:/app/media
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${APP_PORT:-8000}${API_PREFIX:-/api/v1}/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fastdjango_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fastdjango.rule=Host(`${APP_HOST:-api.example.com}`)"
+      - "traefik.http.routers.fastdjango.entrypoints=websecure"
+      - "traefik.http.routers.fastdjango.tls=true"
+      - "traefik.http.routers.fastdjango.tls.certresolver=letsencrypt"
+      - "traefik.http.services.fastdjango.loadbalancer.server.port=${APP_PORT:-80}"
+      # HTTP to HTTPS redirect
+      - "traefik.http.routers.fastdjango-http.rule=Host(`${APP_HOST:-api.example.com}`)"
+      - "traefik.http.routers.fastdjango-http.entrypoints=web"
+      - "traefik.http.routers.fastdjango-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+  # Traefik reverse proxy
+  traefik:
+    image: traefik:v2.11
+    container_name: fastdjango_traefik_prod
+    command:
+      # API and dashboard
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      # Entrypoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Docker provider
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=fastdjango_network"
+      # Let's Encrypt
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-anthonyasamoah48@gmail.com}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      # Logging
+      - "--log.level=${TRAEFIK_LOG_LEVEL:-INFO}"
+      - "--accesslog=true"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "5050:5050"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+    restart: unless-stopped
+    networks:
+      - fastdjango_network
+    labels:
+      # Dashboard
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`${TRAEFIK_DOMAIN:-traefik.example.com}`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik.service=api@internal"
+      # Basic auth for dashboard (generate with: htpasswd -nb admin password)
+      - "traefik.http.routers.traefik.middlewares=traefik-auth"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_BASIC_AUTH:-admin:$$apr1$$8EVjn/nj$$GiLUZqcbueTFeD23SuB6x0}"
+    profiles:
+      - traefik
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: fastdjango_pgadmin_dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@fastdjango.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:5050"
+    volumes:
+      - pgadmin_data_dev:/var/lib/pgadmin
+    depends_on:
+      - db
+    profiles:
+      - tools
+
+volumes:
+  postgres_data_prod:
+  media_data_prod:
+  traefik_letsencrypt:
+
+networks:
+  fastdjango_network:
+    driver: bridge

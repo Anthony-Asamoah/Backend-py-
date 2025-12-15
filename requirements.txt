@@ -2,8 +2,10 @@ apscheduler
 boto3
 django
 django-storages
+google-cloud-storage
 fastapi
 fastapi-limiter
+httpx
 humanize
 inflect
 moviepy
@@ -13,6 +15,9 @@ phonenumbers
 pillow
 pillow-avif-plugin
 psycopg2-binary
+pydantic[email]
 python-decouple
+python-jose[cryptography]
+python-multipart
 tenacity
 uvicorn

@@ -75,13 +75,13 @@ curl http://localhost:8000/api/v1/health
 
 ```
 src/
-├── main/                    # Core application
-│   ├── settings.py         # Django settings
+├── main/                  # Core application
+│   ├── settings.py        # Django settings
 │   ├── asgi.py            # Django + FastAPI integration
 │   ├── router.py          # Main API router
 │   ├── middleware/        # Custom middleware (rate limiting)
 │   └── utils/             # Shared utilities
-├── auth/                   # Authentication module
+├── auth/                  # Authentication module
 │   ├── models.py          # User account models
 │   ├── schema.py          # Pydantic schemas
 │   ├── api.py             # API endpoints
@@ -171,105 +171,144 @@ All models inherit from `BaseModel` which provides:
 
 ### Docker Deployment
 
-Create a `Dockerfile`:
+FastDjango includes separate Docker Compose configurations for local development and production environments.
 
-```dockerfile
-# Build stage
-FROM python:3.11-slim as builder
+#### Local Development with Docker
 
-WORKDIR /app
+1. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your local configuration
+   ```
 
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+2. **Start services**
+   ```bash
+   docker-compose -f docker-compose.yml up -d
+   ```
 
-# Production stage
-FROM python:3.11-slim
+3. **View logs**
+   ```bash
+   docker-compose -f docker-compose.yml logs -f web
+   ```
 
-WORKDIR /app
+4. **Optional: Start with pgAdmin** (for database management)
+   ```bash
+   docker-compose -f docker-compose.yml --profile tools up -d
+   ```
+   pgAdmin will be available at `http://localhost:5050`
 
-# Copy dependencies from builder
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+**Local Features:**
+- Hot reload enabled (code changes reflect immediately)
+- Source code mounted as volume
+- pgAdmin for database management
+- Debug logging enabled
 
-# Copy application
-COPY src/ ./src/
-COPY .env .env
+#### Production Deployment with Docker
 
-# Expose port
-EXPOSE 8000
+1. **Configure production environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with production values:
+   # - Set strong DB_PASSWORD
+   # - Set secure SECRET_KEY
+   # - Set your domain via APP_HOST (e.g., api.yourdomain.com)
+   # - Set ACME_EMAIL for Let's Encrypt
+   # - Set APP_RELOAD=False
+   # - Set LOG_LEVEL=20 (INFO) or 30 (WARNING)
+   ```
 
-# Run migrations and start server
-CMD cd src && python manage.py migrate && python start_server.py
-```
+2. **Start services without Traefik** (if using external reverse proxy)
+   ```bash
+   docker-compose -f docker-compose.prod.yml up -d
+   ```
 
-Create a `docker-compose.yml`:
+3. **Start services with Traefik** (includes automatic SSL)
+   ```bash
+   docker-compose -f docker-compose.prod.yml --profile traefik up -d
+   ```
 
-```yaml
-version: '3.8'
+**Production Features:**
+- Multi-stage optimized Dockerfile
+- Non-root user for security
+- Health checks for all services
+- Traefik reverse proxy with automatic SSL (Let's Encrypt)
+- Automatic HTTP to HTTPS redirect
+- Production logging and restart policies
 
-services:
-  db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: fastdjango
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+#### Traefik Configuration
 
-  web:
-    build: .
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: fastdjango
-    volumes:
-      - ./src:/app/src
-      - media_data:/app/media
+When using Traefik (production), configure these environment variables in `.env`:
 
-volumes:
-  postgres_data:
-  media_data:
-```
-
-Run with Docker:
 ```bash
-docker-compose up -d
+# Your API domain
+APP_HOST=api.yourdomain.com
+
+# Email for Let's Encrypt SSL certificates
+ACME_EMAIL=admin@yourdomain.com
+
+# Traefik dashboard domain (optional)
+TRAEFIK_DOMAIN=traefik.yourdomain.com
+
+# Generate basic auth password:
+# htpasswd -nb admin yourpassword
+TRAEFIK_BASIC_AUTH=admin:$apr1$...
+```
+
+**Traefik Dashboard:** Access at `https://traefik.yourdomain.com` (if configured)
+
+#### Useful Docker Commands
+
+```bash
+# View all running containers
+docker-compose -f docker-compose.yml ps
+
+# Stop all services
+docker-compose -f docker-compose.yml down
+
+# Stop and remove volumes (⚠️ deletes data)
+docker-compose -f docker-compose.yml down -v
+
+# Rebuild containers after dependency changes
+docker-compose -f docker-compose.yml build --no-cache
+
+# Run Django management commands
+docker-compose -f docker-compose.yml exec web python src/manage.py createsuperuser
+
+# Access database
+docker-compose -f docker-compose.yml exec db psql -U postgres -d fastdjango
 ```
 
 ### Production Considerations
 
-1. **Environment Variables**: Use a secure method to manage secrets (e.g., AWS Secrets Manager, HashiCorp Vault)
-2. **Database Migrations**: Run migrations before starting: `python manage.py migrate`
-3. **Static Files**: Serve media files with a CDN or object storage (S3/GCS)
-4. **Reverse Proxy**: Use Nginx or Traefik for SSL termination and load balancing
-5. **Health Checks**: Monitor the `/api/v1/health` endpoint
-6. **Logging**: Set `LOG_LEVEL` appropriately (20 for INFO, 10 for DEBUG)
+1. **Environment Variables**:
+   - Never commit `.env` to version control
+   - Use secure methods for secrets (AWS Secrets Manager, HashiCorp Vault)
+   - Rotate credentials regularly
 
-### Example Nginx Configuration
+2. **Database Migrations**:
+   - Migrations run automatically on container start
+   - For zero-downtime deployments, run migrations separately before updating containers
 
-```nginx
-server {
-    listen 80;
-    server_name api.yourdomain.com;
+3. **Media Files**:
+   - For production at scale, use S3/GCS instead of local storage
+   - Set `STORAGE_TYPE=S3` or `STORAGE_TYPE=GCP` in `.env`
 
-    location / {
-        proxy_pass http://localhost:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
+4. **SSL/TLS**:
+   - Traefik handles SSL automatically with Let's Encrypt
+   - Ensure ports 80 and 443 are open
+   - DNS must point to your server before starting
+
+5. **Health Checks**:
+   - Monitor `/api/v1/health` endpoint
+   - Docker health checks configured for all services
+
+6. **Logging**:
+   - Use `LOG_LEVEL=20` (INFO) for production
+   - Consider centralized logging (ELK, CloudWatch, etc.)
+
+7. **Backups**:
+   - Regularly backup PostgreSQL database
+   - Backup media files if using local storage
 
 ## Development
 
@@ -290,10 +329,11 @@ from main.utils.base_classes import SafeAPIRouter
 
 router = SafeAPIRouter(prefix="/your-module", tags=["Your Module"])
 
-@router.get("/items")
-async def list_items():
-    # Your logic here
-    return {"items": []}
+@router.get(
+   "/items",
+    response_model=YourModuleOutSchema,
+    status_code=200,
+)(your_modeule_service.get)
 ```
 
 ### Database Migrations
@@ -357,31 +397,7 @@ We welcome contributions! Here's how you can help:
 
 ## License
 
-This project is licensed under the MIT License.
-
-```
-MIT License
-
-Copyright (c) 2025 FastDjango Contributors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 

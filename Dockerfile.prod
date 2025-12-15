@@ -1,0 +1,53 @@
+FROM python:3.13-alpine
+
+# set work directory
+WORKDIR /app
+
+# set env variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# install system dependencies
+RUN apk add --no-cache \
+    build-base \
+    postgresql-dev \
+    gcc \
+    musl-dev \
+    linux-headers \
+    netcat-openbsd \
+    ffmpeg \
+    libffi-dev \
+    jpeg-dev \
+    zlib-dev \
+    curl
+
+# upgrade pip
+RUN pip install --upgrade pip
+
+# install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Clean up build dependencies to reduce image size (production optimization)
+RUN apk del build-base gcc musl-dev
+
+# Create non-root user for security
+RUN adduser -D -u 1000 appuser && \
+    mkdir -p /app/media && \
+    chown -R appuser:appuser /app
+
+# copy project
+COPY --chown=appuser:appuser . .
+
+# Make entrypoint script executable
+RUN chmod +x /app/entrypoint.sh
+
+# Switch to non-root user
+USER appuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:${APP_PORT:-8000}${API_PREFIX:-/api/v1}/health || exit 1
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["python", "src/start_server.py"]

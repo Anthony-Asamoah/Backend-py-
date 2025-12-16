@@ -10,12 +10,12 @@ async def delete_media(cls, id: str) -> None:
     log.debug(f'init delete media {id}')
 
     try:
-        media = await cls.repo.aget(id=id)
+        media = await cls.get(id)
 
         # Delete the main file
-        if media.file and media.file.name:
+        if media.file_url:
             try:
-                await delete_file_by_path(media.file.name, media.storage_backend)
+                await delete_file_by_path(media.file_url, media.storage_backend)
             except Exception as e:
                 log.warning(f'Failed to delete main file: {e}')
 
@@ -29,7 +29,7 @@ async def delete_media(cls, id: str) -> None:
                     log.warning(f'Failed to delete {size} thumbnail: {e}')
 
         # Delete the database record
-        await media.adelete()
+        await cls.repo.delete(id)
         log.info(f'Deleted media {id} and associated files')
 
     except ObjectDoesNotExist:

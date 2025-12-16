@@ -1,17 +1,16 @@
-from django.core.exceptions import ObjectDoesNotExist
 from fastapi import BackgroundTasks, HTTPException
 
-from auth.schema import Token, UserAccountStatusChoices
+from auth.repository import revoked_token_repo
+from auth.schema import Token
 from main.utils.logger import log
 
 
 async def activate_account(cls, payload: Token, background_tasks: BackgroundTasks) -> None:
     log.debug(f'init new activate account with payload: {payload}')
-    try:
-        account = await cls.repo.aget(id=payload.token)
-    except ObjectDoesNotExist:
-        raise HTTPException(status_code=404)
-    else:
-        # todo: implement password reset token
-        # background_tasks.add_task(function_here)
-        await account.aupdate({'status': UserAccountStatusChoices.ACTIVE})
+
+    token_obj = await revoked_token_repo.get_by_token(payload.token)
+    if not token_obj: raise HTTPException(status_code=404)
+
+    await cls.repo.activate_account(token_obj.user_account.id)
+
+    # background_tasks.add_task(function_here)

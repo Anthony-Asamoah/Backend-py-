@@ -17,6 +17,7 @@ from .refresh_token import get_new_access_tokens
 from .reset_password import reset_password
 from .reset_password_request import reset_password_request
 from ..models import UserAccount
+from ..repository import UserAccountRepository
 from ..schema import (
     UserAccountCreate, UserAccountOut, UserAccountLogin,
     RefreshToken, Token,
@@ -109,6 +110,6 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
 
 
 user_account_service = UserAccountService(
-    manager=UserAccount.objects,
+    repository=UserAccountRepository(UserAccount),
     out_schema=UserAccountOut
 )

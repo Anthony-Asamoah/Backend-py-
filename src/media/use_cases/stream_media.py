@@ -1,9 +1,9 @@
-import os
 from pathlib import Path
 from typing import Generator
 
 from fastapi import HTTPException, Request
 from fastapi.responses import StreamingResponse, RedirectResponse
+
 from main.utils.logger import log
 
 
@@ -11,21 +11,21 @@ async def stream_media(cls, id: str, request: Request):
     """Stream a media file with support for range requests (seeking in video/audio)"""
     log.debug(f'init stream media with id: {id}')
 
-    media = await cls.repo.filter(id=id).afirst()
-    if not media:
-        raise HTTPException(status_code=404, detail="Media not found")
-
-    if not media.file:
-        raise HTTPException(status_code=404, detail="File not found")
+    media = await cls.repo.get_by_id(id)
+    if not media: raise HTTPException(
+        status_code=404, detail="Media not found"
+    )
+    if not media.file: raise HTTPException(
+        status_code=404, detail="File not found"
+    )
 
     match media.storage_backend:
         case "LOCAL":
             # For local storage, stream with range support
             file_path = Path(media.file.path)
-            if not file_path.exists():
-                raise HTTPException(
-                    status_code=404, detail="File not found in local storage"
-                )
+            if not file_path.exists(): raise HTTPException(
+                status_code=404, detail="File not found in local storage"
+            )
 
             file_size = file_path.stat().st_size
             range_header = request.headers.get("range")
@@ -55,8 +55,7 @@ async def stream_media(cls, id: str, request: Request):
                         "Accept-Ranges": "bytes",
                         "Content-Length": str(content_length),
                         "Content-Type": media.mime_type or "application/octet-stream",
-                    },
-                )
+                    })
             else:
                 # No range header, stream entire file
                 def file_iterator() -> Generator[bytes, None, None]:

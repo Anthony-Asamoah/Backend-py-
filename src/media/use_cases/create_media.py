@@ -1,12 +1,11 @@
 from typing import Optional
 
-from django.core.files.base import ContentFile
 from fastapi import BackgroundTasks
 
 from auth.schema import UserAccountOut
 from main import settings
 from main.utils.logger import log
-from media.schema import MediaCreate, MediaOut
+from media.schema import MediaCreate, MediaOut, MediaRepoCreate
 from media.utils import get_file_mime_type, get_media_metadata
 
 
@@ -31,14 +30,13 @@ async def create_media(
 
     payload = await get_media_metadata(payload, payload.file)
 
+    # Create the media instance and save the file
+    new_media = await cls.repo.create(MediaRepoCreate(
+        **payload.model_dump(),
+        uploaded_by_id=current_user.cursor
+    ))
+
     # background_worker.add_task(upload_file)
     # background_worker.add_task(generate_thumbnails)
 
-    # Convert FastAPI UploadFile to Django File
-    file_content = await file.read()
-    payload.file = ContentFile(file_content, name=file.filename)
-
-    # Create the media instance and save the file
-    new_media = await cls.repo.acreate(**payload.model_dump(), uploaded_by_id=current_user.cursor)
-
-    return cls.to_domain(new_media)
+    return await cls.to_domain(new_media)

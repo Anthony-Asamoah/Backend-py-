@@ -26,6 +26,11 @@ class MediaBase(BaseModel):
     thumbnails_generated: bool = False
 
 
+class MediaRepoCreate(MediaBase):
+    uploaded_by_id: int
+    file: UploadFile
+
+
 class MediaOut(BaseOutSchema, MediaBase):
     file_url: Optional[str] = None
     thumbnails: Optional[ThumbNailOut] = None

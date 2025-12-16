@@ -14,6 +14,7 @@ from .download_media import download_media
 from .get_media import get_media
 from .list_media import list_media
 from .stream_media import stream_media
+from ..repository import MediaRepository
 
 
 class MediaService(BaseService):
@@ -83,6 +84,6 @@ class MediaService(BaseService):
 
 
 media_service = MediaService(
-    manager=Media.objects,
+    repository=MediaRepository(Media),
     out_schema=MediaOut
 )

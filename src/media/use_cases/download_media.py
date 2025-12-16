@@ -3,6 +3,7 @@ from pathlib import Path
 
 from fastapi import HTTPException
 from fastapi.responses import FileResponse, RedirectResponse
+
 from main.utils.logger import log
 
 
@@ -10,12 +11,13 @@ async def download_media(cls, id: str):
     """Download a media file - returns FileResponse for local, redirects for cloud storage"""
     log.debug(f'init download media with id: {id}')
 
-    media = await cls.repo.filter(id=id).afirst()
-    if not media:
-        raise HTTPException(status_code=404, detail="Media not found")
-
-    if not media.file:
-        raise HTTPException(status_code=404, detail="File not found")
+    media = await cls.repo.get_by_id(id)
+    if not media: raise HTTPException(
+        status_code=404, detail="Media not found"
+    )
+    if not media.file: raise HTTPException(
+        status_code=404, detail="File not found"
+    )
 
     # Get the filename from the file path
     filename = os.path.basename(media.file.name)

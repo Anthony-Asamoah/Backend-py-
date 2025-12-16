@@ -1,7 +1,7 @@
-from django.contrib.postgres.search import SearchVector
 from fastapi import HTTPException
 
 from main.utils.logger import log
+from media.schema import MediaOut
 
 
 async def list_media(
@@ -10,20 +10,15 @@ async def list_media(
         id: str = None,
         skip: int = 0,
         limit: int = 100
-) -> list:
+) -> list[MediaOut]:
     log.debug(f'init list media with skip: {skip}, limit: {limit}')
 
-    if id and search:
-        raise HTTPException(status_code=400, detail='Search and id are mutually exclusive')
-
+    if id and search: raise HTTPException(
+        status_code=400, detail='Search and id are mutually exclusive'
+    )
     if id:
-        user = await cls.get(id)
-        return [user]
+        media = await cls.get(id)
+        return [media]
 
-    search_fields = ['title', 'description']
-    if search:
-        results = cls.repo.annotate(search=SearchVector(*search_fields)).filter(search=search)
-        return await cls.evaluate_queryset(results, skip, limit)
-
-    query = cls.repo.all()
-    return await cls.evaluate_queryset(query, skip, limit)
+    result = await cls.repo.list(search, skip, limit)
+    return await cls.to_domain(result, list=True)

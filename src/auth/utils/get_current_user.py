@@ -4,8 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 
-from auth.models import RevokedToken
-from auth.schema import UserAccountOut
+from auth.schema import CurrentAccountPayload
 from auth.utils.authorize_account import authorize_account
 from main import settings
 
@@ -20,7 +19,7 @@ async def get_current_user(
         credentials: Annotated[
             HTTPAuthorizationCredentials, Depends(settings.AUTH_SECURITY_SCHEME)
         ]
-) -> UserAccountOut:
+) -> CurrentAccountPayload:
     token = credentials.credentials
     try:
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -30,13 +29,22 @@ async def get_current_user(
         raise credentials_exception
 
     # get revoked tokens
-    is_revoked = await RevokedToken.objects.filter(token=token).afirst()
+    from auth.repository import revoked_token_repo
+    is_revoked = await revoked_token_repo.get_by_token(token)
     if is_revoked: raise credentials_exception
 
     # retrieve user account
     from auth.use_cases import user_account_service
-    user = await user_account_service.repo.filter(identifier=identifier).afirst()
-    is_authorized = await authorize_account(user)
+    account = await user_account_service.repo.get_by_identifier(identifier=identifier)
+    is_authorized = await authorize_account(account)
     if not is_authorized: raise credentials_exception
 
-    return user
+    return CurrentAccountPayload(
+        cursor=account.cursor,
+        id=account.id,
+        identifier=account.identifier,
+        identifier_type=account.identifier_type,
+        status=account.status,
+        is_deleted=account.is_deleted,
+        created_on=account.created_on,
+    )

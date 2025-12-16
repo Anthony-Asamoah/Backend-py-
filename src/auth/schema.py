@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated, Optional
 
 from django.db.models.enums import TextChoices
-from pydantic import AfterValidator, BaseModel, EmailStr
+from pydantic import AfterValidator, BaseModel, UUID4
 
 from main.utils.base_classes import BaseOutSchema
 from main.utils.validators import validate_phone_number, validate_str
@@ -32,11 +32,19 @@ class UserAccountBase(BaseModel):
         exclude_unset = True
 
 
+class UserAccountRepoCreate(UserAccountBase):
+    id: Optional[UUID4] = None
+
+
 class UserAccountOut(BaseOutSchema, UserAccountBase):
     identifier_type: IdentifierChoices
     status: UserAccountStatusChoices
     is_deleted: bool
     created_on: datetime
+
+
+class CurrentAccountPayload(UserAccountOut):
+    cursor: int
 
 
 class UserAccountCreate(UserAccountBase):
@@ -67,5 +75,17 @@ class UserAccountLoginOut(UserAccountTokens):
 class ChangePassword(BaseModel):
     password: RequiredStr
 
+
 class ResetPassword(ChangePassword):
     token: str
+
+
+class PasswordResetTokenRepoCreate(BaseModel):
+    reset_password_token: str
+    expires_on: datetime
+    user_account_id: int
+
+
+class RevokedTokenRepoCreate(BaseModel):
+    token: str
+    expires_on: datetime

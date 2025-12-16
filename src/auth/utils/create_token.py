@@ -16,7 +16,7 @@ def create_token(key: str, data: dict, expires_delta: timedelta) -> str:
 
 async def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     if not expires_delta:
-        expires_delta = timedelta(seconds=settings.ACCESS_TOKEN_EXPIRES_IN_MINUTES)
+        expires_delta = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRES_IN_MINUTES)
     return create_token(settings.JWT_SECRET_KEY, data, expires_delta)
 
 

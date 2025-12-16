@@ -25,7 +25,7 @@ async def validate_refresh_token(token: Annotated[str, Depends(settings.AUTH_SEC
     else:
         log.info(f'identifier {identifier}')
         from auth.use_cases import user_account_service
-        user = await user_account_service.get(identifier)
+        user = await user_account_service.get_by_identifier(identifier)
         if user is None: raise credentials_exception
 
         return user

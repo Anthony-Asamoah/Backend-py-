@@ -7,6 +7,7 @@ from io import BytesIO
 
 import pillow_avif  # noqa
 from PIL import Image
+from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files import File
@@ -63,7 +64,6 @@ def get_storage_backend(backend_type=None):
 
 async def delete_file_from_local(path: str):
     """Delete a file from local storage"""
-    from asgiref.sync import sync_to_async
 
     try:
         file_path = os.path.join(settings.MEDIA_ROOT, path)
@@ -79,7 +79,6 @@ async def delete_file_from_local(path: str):
 
 async def delete_file_from_s3(path: str):
     """Delete a file from AWS S3 storage"""
-    from asgiref.sync import sync_to_async
 
     try:
         storage = S3Boto3Storage()
@@ -92,7 +91,6 @@ async def delete_file_from_s3(path: str):
 
 async def delete_file_from_gcs(path: str):
     """Delete a file from Google Cloud Storage"""
-    from asgiref.sync import sync_to_async
 
     try:
         storage = GoogleCloudStorage()

@@ -1,15 +1,12 @@
-from django.core.exceptions import ObjectDoesNotExist
 from fastapi import HTTPException
 
 from main.utils.logger import log
 
 
-async def get_media(self, id: str):
+async def get_media(cls, id: str):
     log.debug(f'init get media with id: {id}')
 
-    try:
-        obj = await self.repo.aget(id=id)
-        return self.to_domain(obj)
+    media = await cls.repo.get_by_id(id)
+    if not media: raise HTTPException(status_code=404)
 
-    except ObjectDoesNotExist:
-        raise HTTPException(status_code=404)
+    return await cls.to_domain(media)

@@ -1,8 +1,8 @@
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import Q
 from fastapi import BackgroundTasks, HTTPException
 
-from auth.schema import UserAccountCreate, IdentifierChoices
+from auth.repository import password_reset_token_repo
+from auth.schema import UserAccountCreate, IdentifierChoices, UserAccountRepoCreate
 from auth.utils import detect_identifier_type
 from auth.utils.password_hasher import Hasher
 from main.utils.logger import log
@@ -21,17 +21,17 @@ async def create_account(cls, payload: UserAccountCreate, background_tasks: Back
         payload.identifier = validate_phone_number(payload.identifier)
 
     # check if account already exists with this exact identifier
-    account = await cls.repo.filter(identifier=payload.identifier).afirst()
+    account = await cls.repo.get_by_identifier(identifier=payload.identifier)
     if account: raise HTTPException(status_code=400, detail='Account already exists')
 
     # check if user profile exists with this account
-    user_info = await user_info_service.repo.filter(
-        Q(email=payload.identifier) | Q(phone_number=payload.identifier)
-    ).afirst()
+    user_info = await user_info_service.repo.get_user_by_email_or_phone_number(
+        email=payload.identifier, phone_number=payload.identifier
+    )
 
     if user_info and not account:
         # check if there's already an account linked to this user profile
-        existing_account = await cls.repo.filter(id=user_info.id).afirst()
+        existing_account = await cls.repo.get_by_id(id=user_info.id)
         # determine which identifier was used for the existing account
         opposite_field = 'phone number' if identifier_type == IdentifierChoices.EMAIL else 'email'
         if existing_account: raise HTTPException(
@@ -42,30 +42,33 @@ async def create_account(cls, payload: UserAccountCreate, background_tasks: Back
         # check for account using the opposite identifier from the user profile
         if identifier_type == IdentifierChoices.EMAIL:
             # user is signing up with email, check if account exists with their phone
-            existing_account = await cls.repo.filter(identifier=user_info.phone_number).afirst()
+            existing_account = await cls.repo.get_by_identifier(identifier=user_info.phone_number)
             if existing_account: raise HTTPException(
                 status_code=400,
                 detail='Account already exists for this profile. Try logging in with your phone number instead.'
             )
         else:
             # user is signing up with phone, check if account exists with their email
-            existing_account = await cls.repo.filter(identifier=user_info.email).afirst()
+            existing_account = await cls.repo.get_by_identifier(identifier=user_info.email)
             if existing_account: raise HTTPException(
                 status_code=400,
                 detail='Account already exists for this profile. Try logging in with your email instead.'
             )
 
-    new_account_payload = {**payload.model_dump(), 'identifier_type': identifier_type.name}
+    new_account_payload = UserAccountRepoCreate(**payload.model_dump())
 
     # link to existing user profile if found
-    if user_info: new_account_payload['id'] = user_info.id
+    if user_info: new_account_payload.id = user_info.id
 
     # hash password
-    new_account_payload['password'] = Hasher.get_password_hash(payload.password)
+    new_account_payload.password = Hasher.get_password_hash(payload.password)
 
     # create account record
-    new_account = await cls.repo.acreate(**new_account_payload)
+    new_account = await cls.repo.create(new_account_payload)
 
+    # create password reset token
+    reset_token = await password_reset_token_repo.create(new_account.cursor)
+    log.info(f'generated reset token: {reset_token}')
     # trigger notifications
     if identifier_type == IdentifierChoices.EMAIL:
         # background_tasks.add_task(send_otp_email)
@@ -78,4 +81,4 @@ async def create_account(cls, payload: UserAccountCreate, background_tasks: Back
     else:
         raise ImproperlyConfigured(f'Invalid identifier type: {payload.identifier_type}')
 
-    return cls.to_domain(new_account)
+    return await cls.to_domain(new_account)

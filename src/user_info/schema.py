@@ -1,8 +1,8 @@
 import datetime
-from typing import Annotated, Optional, Union
+from typing import Annotated, Optional
 
 from django.db.models.enums import TextChoices
-from pydantic import AfterValidator, BaseModel, EmailStr
+from pydantic import AfterValidator, BaseModel, EmailStr, UUID4
 
 from main.utils.base_classes import BaseOutSchema
 from main.utils.validators import validate_phone_number, validate_str
@@ -31,6 +31,10 @@ class UserInfoBase(BaseModel):
     class Config:
         from_attributes = True
         exclude_unset = True
+
+
+class UserInfoRepoCreate(UserInfoBase):
+    id: Optional[UUID4] = None
 
 
 class UserInfoCreate(UserInfoBase):

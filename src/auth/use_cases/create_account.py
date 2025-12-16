@@ -1,7 +1,7 @@
 from django.core.exceptions import ImproperlyConfigured
 from fastapi import BackgroundTasks, HTTPException
 
-from auth.repository import password_reset_token_repo
+from auth.repositories import password_reset_token_repo
 from auth.schema import UserAccountCreate, IdentifierChoices, UserAccountRepoCreate
 from auth.utils import detect_identifier_type
 from auth.utils.password_hasher import Hasher

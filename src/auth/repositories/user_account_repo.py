@@ -1,14 +1,8 @@
-from random import choices
-from string import ascii_letters, digits
-
-import pendulum
 from django.contrib.postgres.search import SearchVector
-from django.utils import timezone
 
-from auth.models import UserAccount, PasswordResetToken, RevokedToken
+from auth.models import UserAccount
 from auth.schema import UserAccountStatusChoices
 from auth.utils.password_hasher import Hasher
-from main import settings
 from main.utils.base_classes import BaseRepository
 from main.utils.logger import log
 
@@ -53,40 +47,3 @@ class UserAccountRepository(BaseRepository):
         query = self.model.objects.all()
         result = await self.paginate_queryset(query, skip, limit)
         return result
-
-
-class RevokedTokenRepository(BaseRepository):
-    async def get_by_token(self, token: str) -> PasswordResetToken:
-        result = await (
-            self.model.objects
-            .filter(token=token)
-            .exclude(expires_on__lte=timezone.now())
-            .afirst()
-        )
-        return result
-
-
-class PasswordResetTokenRepository(BaseRepository):
-    async def create(self, user_account_cursor: int) -> str:
-        obj = PasswordResetToken(
-            reset_password_token=''.join(choices(ascii_letters + digits, k=250)),
-            expires_on=pendulum.now().add(hours=settings.PASSWORD_RESET_TOKEN_EXPIRE_HOURS),
-            user_account_id=user_account_cursor,
-        )
-        await obj.asave()
-        return obj.reset_password_token
-
-    async def get_by_token(self, token: str) -> PasswordResetToken:
-        result = await (
-            self.model.objects
-            .select_related('user_account')
-            .filter(reset_password_token=token)
-            .exclude(expires_on__lte=timezone.now())
-            .afirst()
-        )
-        return result
-
-
-user_account_repo = UserAccountRepository(UserAccount)
-revoked_token_repo = RevokedTokenRepository(RevokedToken)
-password_reset_token_repo = PasswordResetTokenRepository(PasswordResetToken)

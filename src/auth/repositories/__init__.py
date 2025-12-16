@@ -1,0 +1,8 @@
+from auth.models import UserAccount, PasswordResetToken, RevokedToken
+from auth.repositories.password_Reset_repo import PasswordResetTokenRepository
+from auth.repositories.revoked_token_repo import RevokedTokenRepository
+from auth.repositories.user_account_repo import UserAccountRepository
+
+user_account_repo = UserAccountRepository(UserAccount)
+revoked_token_repo = RevokedTokenRepository(RevokedToken)
+password_reset_token_repo = PasswordResetTokenRepository(PasswordResetToken)

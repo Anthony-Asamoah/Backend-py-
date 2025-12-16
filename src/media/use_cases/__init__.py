@@ -6,7 +6,6 @@ from fastapi.params import Form
 from auth.schema import UserAccountOut
 from auth.utils import get_current_user
 from main.utils.base_classes import BaseService
-from media.models import Media
 from media.schema import MediaOut, MediaCreate
 from .create_media import create_media
 from .delete_media import delete_media
@@ -14,7 +13,7 @@ from .download_media import download_media
 from .get_media import get_media
 from .list_media import list_media
 from .stream_media import stream_media
-from ..repository import MediaRepository
+from ..repositories import media_repo
 
 
 class MediaService(BaseService):
@@ -84,6 +83,6 @@ class MediaService(BaseService):
 
 
 media_service = MediaService(
-    repository=MediaRepository(Media),
+    repository=media_repo,
     out_schema=MediaOut
 )

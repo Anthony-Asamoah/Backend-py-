@@ -12,7 +12,7 @@ from .delete_user_info import delete_user_info
 from .get_user_info import get_user_info
 from .list_user_info import list_user_info
 from .update_user_info import update_user_info
-from ..repository import UserInfoRepository
+from ..repositories import user_info_repo
 
 
 class UserInfoService(BaseService[UserInfo, UserInfoOut]):
@@ -64,6 +64,6 @@ class UserInfoService(BaseService[UserInfo, UserInfoOut]):
 
 
 user_info_service = UserInfoService(
-    repository=UserInfoRepository(UserInfo),
+    repository=user_info_repo,
     out_schema=UserInfoOut
 )

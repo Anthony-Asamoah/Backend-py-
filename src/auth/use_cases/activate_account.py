@@ -1,6 +1,6 @@
 from fastapi import BackgroundTasks, HTTPException
 
-from auth.repository import revoked_token_repo
+from auth.repositories import revoked_token_repo
 from auth.schema import Token
 from main.utils.logger import log
 

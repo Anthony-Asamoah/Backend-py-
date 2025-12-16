@@ -51,3 +51,6 @@ class UserInfoRepository(BaseRepository):
             query_filter |= f
 
         return await self.model.objects.filter(query_filter).afirst()
+
+
+user_info_repo = UserInfoRepository(UserInfo)

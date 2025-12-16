@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import BackgroundTasks, Depends
 from fastapi.security import HTTPAuthorizationCredentials
 
+from auth.repositories import user_account_repo
 from main import settings
 from main.utils.base_classes import BaseService
 from .activate_account import activate_account
@@ -17,7 +18,6 @@ from .refresh_token import get_new_access_tokens
 from .reset_password import reset_password
 from .reset_password_request import reset_password_request
 from ..models import UserAccount
-from ..repository import UserAccountRepository
 from ..schema import (
     UserAccountCreate, UserAccountOut, UserAccountLogin,
     RefreshToken, Token,
@@ -90,7 +90,7 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
     ) -> list:
         """Get a paginated list of user accounts."""
-        return await list_accounts(self, current_user, search, identifier, is_deleted, skip, limit)
+        return await list_accounts(self, search, identifier, is_deleted, skip, limit)
 
     async def delete(
             self,
@@ -110,6 +110,6 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
 
 
 user_account_service = UserAccountService(
-    repository=UserAccountRepository(UserAccount),
+    repository=user_account_repo,
     out_schema=UserAccountOut
 )

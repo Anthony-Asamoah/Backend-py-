@@ -4,7 +4,7 @@ from auth.schema import ResetPassword
 
 
 async def reset_password(cls, payload: ResetPassword, background_tasks: BackgroundTasks = None) -> None:
-    from auth.repository import password_reset_token_repo
+    from auth.repositories import password_reset_token_repo
     token_obj = await password_reset_token_repo.get_by_token(payload.token)
     if not token_obj: raise HTTPException(status_code=400, detail='Invalid reset token')
 

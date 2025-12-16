@@ -1,6 +1,6 @@
 from fastapi import BackgroundTasks, HTTPException
 
-from auth.repository import password_reset_token_repo
+from auth.repositories import password_reset_token_repo
 from auth.schema import IdentifierChoices
 from auth.utils import detect_identifier_type
 from main.utils.logger import log

@@ -1,7 +1,7 @@
 import pendulum
 from jose import jwt, JWTError
 
-from auth.repository import revoked_token_repo
+from auth.repositories import revoked_token_repo
 from auth.schema import RevokedTokenRepoCreate
 from main import settings
 from main.utils.logger import log

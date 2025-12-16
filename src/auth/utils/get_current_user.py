@@ -29,7 +29,7 @@ async def get_current_user(
         raise credentials_exception
 
     # get revoked tokens
-    from auth.repository import revoked_token_repo
+    from auth.repositories import revoked_token_repo
     is_revoked = await revoked_token_repo.get_by_token(token)
     if is_revoked: raise credentials_exception
 

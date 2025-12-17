@@ -3,7 +3,7 @@ import pendulum
 from django.db import models
 
 from main.utils.base_classes import BaseModel
-from user_info.schema import GenderChoices
+from user_info.schemas import GenderChoices
 
 
 class UserInfo(BaseModel):

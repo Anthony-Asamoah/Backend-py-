@@ -1,7 +1,7 @@
 from pydantic import validate_email
 from pydantic_core import PydanticCustomError
 
-from auth.schema import IdentifierChoices
+from auth.schemas.user_account import IdentifierChoices
 from main.utils.validators import validate_phone_number
 
 

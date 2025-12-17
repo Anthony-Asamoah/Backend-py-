@@ -3,11 +3,12 @@ from typing import Generator
 
 from fastapi import HTTPException, Request
 from fastapi.responses import StreamingResponse, RedirectResponse
+from pydantic import UUID4
 
 from main.utils.logger import log
 
 
-async def stream_media(cls, id: str, request: Request):
+async def stream_media(cls, id: UUID4, request: Request):
     """Stream a media file with support for range requests (seeking in video/audio)"""
     log.debug(f'init stream media with id: {id}')
 

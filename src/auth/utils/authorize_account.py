@@ -1,4 +1,4 @@
-from auth.schema import UserAccountStatusChoices
+from auth.schemas.user_account import UserAccountStatusChoices
 
 
 async def authorize_account(account) -> bool:

@@ -2,10 +2,10 @@ from typing import Optional
 
 from fastapi import BackgroundTasks
 
-from auth.schema import UserAccountOut
+from auth.schemas.user_account import UserAccountOut
 from main import settings
 from main.utils.logger import log
-from media.schema import MediaCreate, MediaOut, MediaRepoCreate
+from media.schemas import MediaCreate, MediaOut, MediaRepoCreate
 from media.utils import get_file_mime_type, get_media_metadata
 
 

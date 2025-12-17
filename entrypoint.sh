@@ -14,6 +14,7 @@ echo "Running database migrations..."
 python src/manage.py migrate
 
 #echo "Running database seeds..."
+python src/manage.py seed_auth
 
 echo "Starting application..."
 exec "$@"

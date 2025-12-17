@@ -2,11 +2,12 @@ from typing import Annotated, Optional
 
 from fastapi import Depends, BackgroundTasks, UploadFile, Request
 from fastapi.params import Form
+from pydantic import UUID4
 
-from auth.schema import UserAccountOut
+from auth.schemas.user_account import UserAccountOut
 from auth.utils import get_current_user
 from main.utils.base_classes import BaseService
-from media.schema import MediaOut, MediaCreate
+from media.schemas import MediaOut, MediaCreate
 from .create_media import create_media
 from .delete_media import delete_media
 from .download_media import download_media
@@ -39,7 +40,7 @@ class MediaService(BaseService):
 
     async def stream(
             self,
-            id: str,
+            id: UUID4,
             request: Request,
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
     ):
@@ -48,7 +49,7 @@ class MediaService(BaseService):
 
     async def download(
             self,
-            id: str,
+            id: UUID4,
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
     ):
         """Download media by ID."""
@@ -57,7 +58,7 @@ class MediaService(BaseService):
     async def read(
             self,
             search: str = None,
-            id: str = None,
+            id: UUID4 = None,
             skip: int = 0,
             limit: int = 100,
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
@@ -67,7 +68,7 @@ class MediaService(BaseService):
 
     async def delete(
             self,
-            id: str,
+            id: UUID4,
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
     ) -> None:
         """Delete by ID."""
@@ -75,7 +76,7 @@ class MediaService(BaseService):
 
     async def get(
             self,
-            id: str,
+            id: UUID4,
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
     ):
         """Get media by ID."""

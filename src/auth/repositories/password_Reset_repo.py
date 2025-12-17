@@ -28,3 +28,6 @@ class PasswordResetTokenRepository(BaseRepository):
             .afirst()
         )
         return result
+
+
+password_reset_token_repo = PasswordResetTokenRepository(PasswordResetToken)

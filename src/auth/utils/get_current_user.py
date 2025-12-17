@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 
-from auth.schema import CurrentAccountPayload
+from auth.schemas.user_account import CurrentAccountPayload
 from auth.utils.authorize_account import authorize_account
 from main import settings
 

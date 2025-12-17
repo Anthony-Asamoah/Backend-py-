@@ -55,6 +55,11 @@ INSTALLED_APPS = [
     'user_info',
 ]
 
+# Seeding and data
+ADMIN_EMAIL = config('ADMIN_EMAIL', cast=str, default='')
+ADMIN_PHONE = config('ADMIN_PHONE', cast=str, default='')
+ADMIN_PASSWORD = config('ADMIN_PASSWORD', cast=str, default='')
+
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv(), default='*')
 
 # Throttling

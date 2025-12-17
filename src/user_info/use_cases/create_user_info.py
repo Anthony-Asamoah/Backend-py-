@@ -2,7 +2,7 @@ from django.db.models import Q
 from fastapi import HTTPException
 
 from main.utils.logger import log
-from user_info.schema import UserInfoCreate, UserInfoRepoCreate, UserInfoOut
+from user_info.schemas import UserInfoCreate, UserInfoRepoCreate, UserInfoOut
 
 
 async def create_user_info(cls, payload: UserInfoCreate) -> UserInfoOut:

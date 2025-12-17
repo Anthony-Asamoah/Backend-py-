@@ -1,13 +1,14 @@
 from fastapi import HTTPException
+from pydantic import UUID4
 
 from main.utils.logger import log
-from media.schema import MediaOut
+from media.schemas import MediaOut
 
 
 async def list_media(
         cls,
         search: str = None,
-        id: str = None,
+        id: UUID4 = None,
         skip: int = 0,
         limit: int = 100
 ) -> list[MediaOut]:

@@ -1,6 +1,6 @@
 from django.utils import timezone
 
-from auth.models import PasswordResetToken
+from auth.models import PasswordResetToken, RevokedToken
 from main.utils.base_classes import BaseRepository
 
 
@@ -13,3 +13,6 @@ class RevokedTokenRepository(BaseRepository):
             .afirst()
         )
         return result
+
+
+revoked_token_repo = RevokedTokenRepository(RevokedToken)

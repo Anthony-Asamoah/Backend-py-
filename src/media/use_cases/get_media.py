@@ -1,9 +1,10 @@
 from fastapi import HTTPException
+from pydantic import UUID4
 
 from main.utils.logger import log
 
 
-async def get_media(cls, id: str):
+async def get_media(cls, id: UUID4):
     log.debug(f'init get media with id: {id}')
 
     media = await cls.repo.get_by_id(id)

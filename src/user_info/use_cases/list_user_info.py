@@ -1,13 +1,14 @@
 from fastapi import HTTPException
+from pydantic import UUID4
 
 from main.utils.logger import log
-from user_info.schema import UserInfoOut
+from user_info.schemas import UserInfoOut
 
 
 async def list_user_info(
         cls,
         search: str = None,
-        id: str = None,
+        id: UUID4 = None,
         skip: int = 0,
         limit: int = 100
 ) -> list[UserInfoOut]:

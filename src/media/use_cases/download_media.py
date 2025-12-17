@@ -3,11 +3,12 @@ from pathlib import Path
 
 from fastapi import HTTPException
 from fastapi.responses import FileResponse, RedirectResponse
+from pydantic import UUID4
 
 from main.utils.logger import log
 
 
-async def download_media(cls, id: str):
+async def download_media(cls, id: UUID4):
     """Download a media file - returns FileResponse for local, redirects for cloud storage"""
     log.debug(f'init download media with id: {id}')
 

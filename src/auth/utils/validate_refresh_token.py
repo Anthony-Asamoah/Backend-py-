@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException
 from jose import JWTError, jwt
 
-from auth.schema import UserAccountOut
+from auth.schemas.user_account import UserAccountOut
 from main import settings
 from main.utils.logger import log
 

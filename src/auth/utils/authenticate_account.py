@@ -1,4 +1,4 @@
-from auth.schema import UserAccountStatusChoices
+from auth.schemas.user_account import UserAccountStatusChoices
 from auth.utils.password_hasher import Hasher
 
 

@@ -1,12 +1,13 @@
 from typing import Annotated
 
 from fastapi import Depends
+from pydantic import UUID4
 
-from auth.schema import UserAccountOut
+from auth.schemas.user_account import UserAccountOut
 from auth.utils import get_current_user
 from main.utils.base_classes import BaseService
 from user_info.models import UserInfo
-from user_info.schema import UserInfoOut, UserInfoCreate, UserInfoUpdate
+from user_info.schemas import UserInfoOut, UserInfoCreate, UserInfoUpdate
 from .create_user_info import create_user_info
 from .delete_user_info import delete_user_info
 from .get_user_info import get_user_info
@@ -29,7 +30,7 @@ class UserInfoService(BaseService[UserInfo, UserInfoOut]):
     async def read(
             self,
             search: str = None,
-            id: str = None,
+            id: UUID4 = None,
             skip: int = 0,
             limit: int = 100,
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
@@ -39,7 +40,7 @@ class UserInfoService(BaseService[UserInfo, UserInfoOut]):
 
     async def update(
             self,
-            id: str,
+            id: UUID4,
             payload: UserInfoUpdate,
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
     ):
@@ -48,7 +49,7 @@ class UserInfoService(BaseService[UserInfo, UserInfoOut]):
 
     async def delete(
             self,
-            id: str,
+            id: UUID4,
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
     ) -> None:
         """Delete by user ID."""
@@ -56,7 +57,7 @@ class UserInfoService(BaseService[UserInfo, UserInfoOut]):
 
     async def get(
             self,
-            id: str,
+            id: UUID4,
             current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
     ):
         """Get user info by user ID."""

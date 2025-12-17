@@ -1,6 +1,5 @@
 from typing import Optional
 
-from django.contrib.postgres.search import SearchVector
 from django.db.models import Q
 
 from main.utils.base_classes import BaseRepository
@@ -9,27 +8,6 @@ from user_info.models import UserInfo
 
 
 class UserInfoRepository(BaseRepository):
-
-    async def list(
-            self,
-            search: str = None,
-            skip: int = 0,
-            limit: int = 100
-    ) -> list[UserInfo]:
-        log.debug(f'init list user info with skip: {skip}, limit: {limit}')
-
-        search_fields = ['first_name', 'last_name', 'other_names', 'email', 'phone_number']
-        if search:
-            query = (
-                self.model.objects
-                .annotate(search=SearchVector(*search_fields))
-                .filter(search=search)
-            )
-            return await self.paginate_queryset(query, skip, limit)
-
-        query = self.model.objects.all()
-        result = await self.paginate_queryset(query, skip, limit)
-        return result
 
     async def get_user_by_email_or_phone_number(
             self,
@@ -53,4 +31,7 @@ class UserInfoRepository(BaseRepository):
         return await self.model.objects.filter(query_filter).afirst()
 
 
-user_info_repo = UserInfoRepository(UserInfo)
+user_info_repo = UserInfoRepository(
+    model=UserInfo,
+    search_fields=['first_name', 'last_name', 'other_names', 'email', 'phone_number']
+)

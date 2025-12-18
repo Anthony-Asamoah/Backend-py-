@@ -7,9 +7,9 @@ from main.utils.exception_handling import SafeAPIRouter
 from user_info.schemas import UserInfoOut
 from user_info.use_cases import user_info_service
 
-user_info_router = SafeAPIRouter()
+user_info_routes = SafeAPIRouter(tags=['USER PROFILE'])
 
-user_info_router.post(
+user_info_routes.post(
     '',
     response_model=UserInfoOut,
     status_code=201,
@@ -17,7 +17,7 @@ user_info_router.post(
     summary="Create user profile",
 )(user_info_service.create)
 
-user_info_router.get(
+user_info_routes.get(
     '',
     response_model=List[UserInfoOut],
     status_code=200,
@@ -25,7 +25,7 @@ user_info_router.get(
     summary="List user profiles",
 )(user_info_service.read)
 
-user_info_router.patch(
+user_info_routes.patch(
     '/{id}',
     response_model=UserInfoOut,
     status_code=200,
@@ -33,7 +33,7 @@ user_info_router.patch(
     summary="Update user profile",
 )(user_info_service.update)
 
-user_info_router.delete(
+user_info_routes.delete(
     '/{id}',
     status_code=204,
     dependencies=[Depends(check_user_permission(['user_info.userinfo:delete', 'user_info.*:*']))],

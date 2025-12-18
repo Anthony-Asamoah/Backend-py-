@@ -5,6 +5,7 @@ from fastapi import HTTPException, Depends, status
 from auth.schemas.user_account import CurrentAccountPayload
 from auth.use_cases.role import role_service
 from auth.utils import get_current_user
+from auth.utils.permission_generator import permission_generator
 from main.utils.logger import log
 
 
@@ -52,10 +53,16 @@ def check_user_role(roles: list[str]):
 def check_user_permission(permissions: list[str]):
     """
     Dependency to check if user has any of the required permissions.
-    Supports wildcard permissions (e.g., 'user_account.*' matches 'user_account.create').
+
+    Supports dynamic permission format: app_label.model_name:action
+    Examples:
+        - 'notification.notification_template:create'
+        - 'notification.notification:read'
+        - 'notification.*:*' (wildcard for all models in app)
+        - 'notification.notification:*' (wildcard for all actions on model)
 
     Args:
-        permissions: List of permission names (e.g., ['user_account.create', 'user_account.*'])
+        permissions: List of permission names in format 'app.model:action'
 
     Returns:
         Set of matching permissions
@@ -75,29 +82,16 @@ def check_user_permission(permissions: list[str]):
             for perm in role.permissions:
                 user_permissions.add(perm.name.lower())
 
-        # Check for matching permissions (including wildcard support)
+        # Check for matching permissions using dynamic permission matcher
         available_permissions = set()
         for required_perm in permissions:
             required_perm_lower = required_perm.lower()
 
-            # Direct match
-            if required_perm_lower in user_permissions:
-                available_permissions.add(required_perm)
-                continue
-
-            # Wildcard match (e.g., user has 'user_account.*', needs 'user_account.create')
-            resource = required_perm_lower.rsplit('.', 1)[0] if '.' in required_perm_lower else required_perm_lower
-            wildcard = f"{resource}.*"
-            if wildcard in user_permissions:
-                available_permissions.add(required_perm)
-                continue
-
-            # Check if user has wildcard and required is specific
-            # (e.g., user needs 'user_account.*', has 'user_account.create')
-            if required_perm_lower.endswith('.*'):
-                if any(p.startswith(resource + '.') for p in user_permissions):
+            # Check against each user permission
+            for user_perm in user_permissions:
+                if permission_generator.check_permission_match(required_perm_lower, user_perm):
                     available_permissions.add(required_perm)
-                    continue
+                    break
 
         if not available_permissions:
             log.warning(

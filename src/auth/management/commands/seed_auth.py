@@ -5,22 +5,23 @@ from auth.models import Permission, Role, UserAccount
 from auth.repositories import role_repo, user_account_repo
 from auth.schemas.user_account import UserAccountStatusChoices
 from auth.utils.password_hasher import Hasher
+from auth.utils.permission_generator import permission_generator
 from main import settings
 from main.utils.logger import log
 
 
 class Command(BaseCommand):
-    help = 'Seed database with permissions, roles, and superuser'
+    help = 'Seed database with permissions, roles, and superuser (using dynamic permissions)'
 
     def handle(self, *args, **options):
         async_to_sync(self.async_handle)(*args, **options)
 
     async def async_handle(self, *args, **options):
         """Main seeding logic."""
-        self.stdout.write(self.style.SUCCESS('Starting database seeding...'))
+        self.stdout.write(self.style.SUCCESS('Starting database seeding with dynamic permissions...'))
 
-        # Step 1: Create permissions
-        permissions = await self.create_permissions()
+        # Step 1: Generate and create permissions dynamically
+        permissions = await self.create_dynamic_permissions()
         self.stdout.write(self.style.SUCCESS(f'Created/verified {len(permissions)} permissions'))
 
         # Step 2: Create roles
@@ -42,44 +43,21 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS('\nDatabase seeding completed successfully!'))
 
-    async def create_permissions(self):
-        """Create all permissions."""
-        permission_names = [
-            # User Account permissions
-            'user_account.*',
-            'user_account.create',
-            'user_account.read',
-            'user_account.update',
-            'user_account.delete',
+    async def create_dynamic_permissions(self):
+        """
+        Create permissions dynamically from Django models.
 
-            # Role permissions
-            'role.*',
-            'role.create',
-            'role.read',
-            'role.update',
-            'role.delete',
+        Format: app_label.model_name:action
+        Examples:
+            - notification.notification_template:create
+            - notification.notification:read
+            - user_info.userinfo:update
+            - media.media:delete
+        """
+        # Generate all permissions from installed apps
+        permission_names = permission_generator.generate_all_permissions()
 
-            # Permission permissions
-            'permission.*',
-            'permission.create',
-            'permission.read',
-            'permission.update',
-            'permission.delete',
-
-            # User Info permissions
-            'user_info.*',
-            'user_info.create',
-            'user_info.read',
-            'user_info.update',
-            'user_info.delete',
-
-            # Media permissions
-            'media.*',
-            'media.create',
-            'media.read',
-            'media.update',
-            'media.delete',
-        ]
+        self.stdout.write(f'Generating {len(permission_names)} dynamic permissions...')
 
         permissions = {}
         for perm_name in permission_names:
@@ -127,28 +105,38 @@ class Command(BaseCommand):
         return roles
 
     async def assign_permissions_to_roles(self, roles, permissions):
-        """Assign permissions to each role."""
+        """
+        Assign permissions to each role using the new dynamic format.
 
-        # Admin role: All permissions
-        admin_permissions = [
-            'user_account.*', 'role.*', 'permission.*', 'user_info.*', 'media.*'
-        ]
+        Format: app.model:action
+        Wildcards:
+            - app.*:* = all models and actions in app
+            - app.model:* = all actions on model
+        """
+
+        # Admin role: All permissions (wildcard for all apps)
+        admin_permissions = [perm for perm in permissions.keys() if perm.endswith('*:*')]
         await self._assign_permissions(roles['admin'], admin_permissions, permissions)
 
-        # Moderator role: Limited permissions
+        # Moderator role: Read all, manage user_info and media
         moderator_permissions = [
-            'user_account.read',
-            'user_account.update',
-            'user_info.*',
-            'media.*',
-            'role.read',
-            'permission.read'
+            'auth.useraccount:read',
+            'auth.role:read',
+            'auth.permission:read',
+            'user_info.*:*',
+            'media.*:*',
+            'notification.notification:read',
+            'notification.notificationdispatch:read',
         ]
         await self._assign_permissions(roles['moderator'], moderator_permissions, permissions)
 
-        # User role: Basic permissions
+        # User role: Basic permissions (own data)
         user_permissions = [
-            'user_info.read', 'media.create', 'media.read', 'media.update'
+            'user_info.userinfo:read',
+            'media.media:create',
+            'media.media:read',
+            'media.media:update',
+            'notification.notification:read',
         ]
         await self._assign_permissions(roles['user'], user_permissions, permissions)
 

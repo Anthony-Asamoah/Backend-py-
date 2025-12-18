@@ -72,7 +72,7 @@ class BaseRepository(Generic[ModelType,]):
         return await self.model.objects.filter(id=id).afirst()
 
     async def list(self, search: str = None, skip: int = 0, limit: int = 100) -> list[ModelType]:
-        log.debug(f'init list user info with skip: {skip}, limit: {limit}')
+        log.debug(f'init list {self.model.__name__} with skip: {skip}, limit: {limit}')
         query = self.model.objects.all()
 
         if search:

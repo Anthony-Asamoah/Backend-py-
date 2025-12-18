@@ -75,27 +75,27 @@ user_account_router.get(
     '',
     response_model=List[UserAccountOut],
     status_code=200,
-    dependencies=[Depends(check_user_permission(['user_account.read', 'user_account.*']))],
+    dependencies=[Depends(check_user_permission(['auth.useraccount:read', 'auth.*:*']))],
     summary="List all user accounts (admin only)",
 )(user_account_service.read)
 
 user_account_router.delete(
     '/{id}',
     status_code=204,
-    dependencies=[Depends(check_user_permission(['user_account.delete', 'user_account.*']))],
+    dependencies=[Depends(check_user_permission(['auth.useraccount:delete', 'auth.*:*']))],
     summary="Delete a user account by ID (admin only)",
 )(user_account_service.delete)
 
 user_account_router.post(
     "/assign-roles",
     status_code=204,
-    dependencies=[Depends(check_user_permission(['user_account.update', 'user_account.*']))],
+    dependencies=[Depends(check_user_permission(['auth.useraccount:update', 'auth.*:*']))],
     summary="Assign roles to user account (admin only)",
 )(user_account_service.assign_roles)
 
 user_account_router.post(
     "/remove-roles",
     status_code=204,
-    dependencies=[Depends(check_user_permission(['user_account.update', 'user_account.*']))],
+    dependencies=[Depends(check_user_permission(['auth.useraccount:update', 'auth.*:*']))],
     summary="Remove roles from user account (admin only)",
 )(user_account_service.remove_roles)

@@ -1,3 +1,4 @@
+import asyncio
 from typing import TypeVar, Generic, List, Type, Optional, Union
 from uuid import uuid4
 
@@ -89,6 +90,11 @@ class BaseService(Generic[ModelType, OutSchemaType]):
         self.out_schema = out_schema
 
     async def to_domain(self, obj, list=False) -> OutSchemaType:
+        if not list:
+            return await self._serialize(obj)
+        else:
+            return await asyncio.gather(*[self._serialize(_) for _ in obj])
+
+    async def _serialize(self, single_obj: BaseModel):
         """Convert Django model instance to Pydantic schema."""
-        if list: return [self.out_schema.model_validate(_) for _ in obj]
-        return self.out_schema.model_validate(obj)
+        return self.out_schema.model_validate(single_obj)

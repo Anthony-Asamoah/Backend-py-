@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends
 from pydantic import UUID4
 
-from auth.schemas.user_account import UserAccountOut
+from auth.schemas.user_account import CurrentAccountPayload
 from auth.utils import get_current_user
 from main.utils.base_classes import BaseService
 from user_info.models import UserInfo
@@ -22,7 +22,7 @@ class UserInfoService(BaseService[UserInfo, UserInfoOut]):
     async def create(
             self,
             payload: UserInfoCreate,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ):
         """Create a new profile with a user's information."""
         return await create_user_info(self, payload)
@@ -33,7 +33,7 @@ class UserInfoService(BaseService[UserInfo, UserInfoOut]):
             id: UUID4 = None,
             skip: int = 0,
             limit: int = 100,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> list:
         """Get a paginated list of users information."""
         return await list_user_info(self, search, id, skip, limit)
@@ -42,7 +42,7 @@ class UserInfoService(BaseService[UserInfo, UserInfoOut]):
             self,
             id: UUID4,
             payload: UserInfoUpdate,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ):
         """Update user information with partial data."""
         return await update_user_info(self, id, payload)
@@ -50,7 +50,7 @@ class UserInfoService(BaseService[UserInfo, UserInfoOut]):
     async def delete(
             self,
             id: UUID4,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> None:
         """Delete by user ID."""
         return await delete_user_info(self, id)
@@ -58,7 +58,7 @@ class UserInfoService(BaseService[UserInfo, UserInfoOut]):
     async def get(
             self,
             id: UUID4,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ):
         """Get user info by user ID."""
         return await get_user_info(self, id)

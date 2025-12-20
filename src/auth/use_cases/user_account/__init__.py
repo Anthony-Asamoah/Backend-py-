@@ -6,8 +6,15 @@ from pydantic import UUID4
 
 from auth.models import UserAccount
 from auth.schemas.password_reset_token import ChangePassword, ResetPassword
-from auth.schemas.user_account import UserAccountOut, UserAccountLogin, RefreshToken, UserAccountCreate, Token, \
-    CurrentAccountOut
+from auth.schemas.user_account import (
+    UserAccountOut,
+    UserAccountLogin,
+    RefreshToken,
+    UserAccountCreate,
+    Token,
+    CurrentAccountOut,
+    CurrentAccountPayload
+)
 from auth.utils import get_current_user
 from main import settings
 from main.utils.base_classes import BaseService
@@ -59,10 +66,10 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
             self, *,
             payload: ChangePassword,
             tasks: BackgroundTasks,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> None:
         """change account password."""
-        await change_password(self, str(current_user.id), payload, tasks)
+        await change_password(self, current_user.id, payload, tasks)
 
     async def reset_password_request(
             self, *,
@@ -93,7 +100,7 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
             is_deleted: bool = None,
             skip: int = 0,
             limit: int = 100,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> list:
         """Get a paginated list of user accounts."""
         return await list_accounts(self, search, identifier, is_deleted, skip, limit)
@@ -101,7 +108,7 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
     async def delete(
             self,
             id: UUID4,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> None:
         """Delete by user ID."""
         return await delete_account(self, id)
@@ -109,14 +116,14 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
     async def get(
             self,
             identifier: str,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ):
         """Get user account by user ID."""
         return await get_account(self, identifier)
 
     async def get_authenticated_user(
             self,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> CurrentAccountOut:
         """Get the authenticated user account details"""
         return await get_authenticated_user(self, current_user)

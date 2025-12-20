@@ -15,7 +15,7 @@ from .list_roles import list_roles
 from .remove_permissions import remove_permissions
 from ...repositories.role_repo import role_repo
 from ...schemas.role import RoleOut, RoleCreate, SingleRoleOut
-from ...schemas.user_account import UserAccountOut
+from ...schemas.user_account import CurrentAccountPayload
 
 
 class RoleService(BaseService[Role, RoleOut]):
@@ -25,7 +25,7 @@ class RoleService(BaseService[Role, RoleOut]):
             self,
             role_id: UUID4,
             permissions_ids: list[str],
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> None:
         """Add permissions to role."""
         return await add_permissions(self, role_id, permissions_ids)
@@ -34,7 +34,7 @@ class RoleService(BaseService[Role, RoleOut]):
             self,
             role_id: UUID4,
             permissions_ids: list[str],
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> None:
         """Remove permissions from role."""
         return await remove_permissions(self, role_id, permissions_ids)
@@ -43,7 +43,7 @@ class RoleService(BaseService[Role, RoleOut]):
             self,
             payload: RoleCreate,
             tasks: BackgroundTasks = None,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ):
         """Create a new role."""
         return await create_role(self, payload, tasks)
@@ -55,7 +55,7 @@ class RoleService(BaseService[Role, RoleOut]):
             user_id: UUID4 = None,
             skip: int = 0,
             limit: int = 100,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> list:
         """Get a paginated list of roles."""
         return await list_roles(self, search, id, user_id, skip, limit)
@@ -63,7 +63,7 @@ class RoleService(BaseService[Role, RoleOut]):
     async def delete(
             self,
             id: UUID4,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> None:
         """Delete by ID."""
         return await delete_role(self, id)
@@ -71,7 +71,7 @@ class RoleService(BaseService[Role, RoleOut]):
     async def get(
             self,
             id: UUID4,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> SingleRoleOut:
         """Get role by ID."""
         return await get_role(self, id)
@@ -79,7 +79,7 @@ class RoleService(BaseService[Role, RoleOut]):
     async def get_user_roles(
             self,
             user_id: UUID4,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> List[SingleRoleOut]:
         """Get all roles for a user"""
         return await get_user_roles(self, user_id)

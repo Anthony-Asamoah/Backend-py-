@@ -13,7 +13,7 @@ from .list_permissions import list_permissions
 from .update_permission import update_permission
 from ...repositories.permission_repo import permission_repo
 from ...schemas.permission import PermissionOut, PermissionCreate, PermissionUpdate
-from ...schemas.user_account import UserAccountOut
+from ...schemas.user_account import CurrentAccountPayload
 
 
 class PermissionService(BaseService[Permission, PermissionOut]):
@@ -23,7 +23,7 @@ class PermissionService(BaseService[Permission, PermissionOut]):
             self,
             payload: PermissionCreate,
             tasks: BackgroundTasks = None,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ):
         """Create a new permission."""
         return await create_permission(self, payload, tasks)
@@ -34,7 +34,7 @@ class PermissionService(BaseService[Permission, PermissionOut]):
             id: UUID4 = None,
             skip: int = 0,
             limit: int = 100,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> list:
         """Get a paginated list of permissions."""
         return await list_permissions(self, search, id, skip, limit)
@@ -43,7 +43,7 @@ class PermissionService(BaseService[Permission, PermissionOut]):
             self, *,
             id: UUID4,
             payload: PermissionUpdate,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ):
         """Get a paginated list of permissions."""
         return await update_permission(self, id, payload)
@@ -51,7 +51,7 @@ class PermissionService(BaseService[Permission, PermissionOut]):
     async def delete(
             self,
             id: UUID4,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> None:
         """Delete by ID."""
         return await delete_permission(self, id)
@@ -59,7 +59,7 @@ class PermissionService(BaseService[Permission, PermissionOut]):
     async def get(
             self,
             id: UUID4,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ):
         """Get permission by ID."""
         return await get_permission(self, id)

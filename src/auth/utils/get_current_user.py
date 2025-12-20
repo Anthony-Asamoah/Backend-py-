@@ -16,9 +16,7 @@ credentials_exception = HTTPException(
 
 
 async def get_current_user(
-        credentials: Annotated[
-            HTTPAuthorizationCredentials, Depends(settings.AUTH_SECURITY_SCHEME)
-        ]
+        credentials: Annotated[HTTPAuthorizationCredentials, Depends(settings.AUTH_SECURITY_SCHEME)]
 ) -> CurrentAccountPayload:
     token = credentials.credentials
     try:

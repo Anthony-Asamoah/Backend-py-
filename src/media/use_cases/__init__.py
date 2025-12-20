@@ -4,7 +4,7 @@ from fastapi import Depends, BackgroundTasks, UploadFile, Request
 from fastapi.params import Form
 from pydantic import UUID4
 
-from auth.schemas.user_account import UserAccountOut
+from auth.schemas.user_account import CurrentAccountPayload
 from auth.utils import get_current_user
 from main.utils.base_classes import BaseService
 from media.schemas import MediaOut, MediaCreate
@@ -26,7 +26,7 @@ class MediaService(BaseService):
             description: Optional[str] = Form(None),
             is_reusable: bool = Form(False),
             language: Optional[str] = Form(None),
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
             tasks: BackgroundTasks = None
     ):
         """Upload a file"""
@@ -42,7 +42,7 @@ class MediaService(BaseService):
             self,
             id: UUID4,
             request: Request,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ):
         """Stream media by ID with range support for video/audio seeking."""
         return await stream_media(self, id, request)
@@ -50,7 +50,7 @@ class MediaService(BaseService):
     async def download(
             self,
             id: UUID4,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ):
         """Download media by ID."""
         return await download_media(self, id)
@@ -61,7 +61,7 @@ class MediaService(BaseService):
             id: UUID4 = None,
             skip: int = 0,
             limit: int = 100,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> list:
         """Get a paginated list of media."""
         return await list_media(self, search, id, skip, limit)
@@ -69,7 +69,7 @@ class MediaService(BaseService):
     async def delete(
             self,
             id: UUID4,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> None:
         """Delete by ID."""
         return await delete_media(self, id)
@@ -77,7 +77,7 @@ class MediaService(BaseService):
     async def get(
             self,
             id: UUID4,
-            current_user: Annotated[UserAccountOut, Depends(get_current_user)] = None,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ):
         """Get media by ID."""
         return await get_media(self, id)

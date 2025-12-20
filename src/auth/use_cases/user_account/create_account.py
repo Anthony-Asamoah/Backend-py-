@@ -21,7 +21,7 @@ async def create_account(cls, payload: UserAccountCreate, background_tasks: Back
         payload.identifier = validate_phone_number(payload.identifier)
 
     # check if account already exists with this exact identifier
-    account = await cls.repo.get_by_identifier(identifier=payload.identifier)
+    account = await cls.repo.get_by_identifier(payload.identifier)
     if account: raise HTTPException(status_code=400, detail='Account already exists')
 
     # check if user profile exists with this account
@@ -42,14 +42,14 @@ async def create_account(cls, payload: UserAccountCreate, background_tasks: Back
         # check for account using the opposite identifier from the user profile
         if identifier_type == IdentifierChoices.EMAIL:
             # user is signing up with email, check if account exists with their phone
-            existing_account = await cls.repo.get_by_identifier(identifier=user_info.phone_number)
+            existing_account = await cls.repo.get_by_identifier(user_info.phone_number)
             if existing_account: raise HTTPException(
                 status_code=400,
                 detail='Account already exists for this profile. Try logging in with your phone number instead.'
             )
         else:
             # user is signing up with phone, check if account exists with their email
-            existing_account = await cls.repo.get_by_identifier(identifier=user_info.email)
+            existing_account = await cls.repo.get_by_identifier(user_info.email)
             if existing_account: raise HTTPException(
                 status_code=400,
                 detail='Account already exists for this profile. Try logging in with your email instead.'

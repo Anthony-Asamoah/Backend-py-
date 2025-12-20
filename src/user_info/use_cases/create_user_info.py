@@ -1,4 +1,3 @@
-from django.db.models import Q
 from fastapi import HTTPException
 
 from main.utils.logger import log
@@ -19,10 +18,8 @@ async def create_user_info(cls, payload: UserInfoCreate) -> UserInfoOut:
     new_user_info_payload = UserInfoRepoCreate(**payload.model_dump())
 
     # use the id of an existing account (if any)
-    from auth.use_cases import user_account_service  # todo: user account repository
-    existing_account = await user_account_service.repo.filter(
-        Q(identifier=payload.email) | Q(identifier=payload.phone_number)
-    ).afirst()
+    from auth.use_cases import user_account_service
+    existing_account = await user_account_service.repo.get_by_identifier(payload.email, payload.phone_number)
     if existing_account: new_user_info_payload.id = existing_account.id
 
     new_user_info = await cls.repo.create(new_user_info_payload)

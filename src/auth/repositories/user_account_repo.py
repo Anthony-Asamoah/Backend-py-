@@ -1,3 +1,6 @@
+from typing import Optional
+
+from django.db.models import Q
 from pydantic import UUID4
 
 from auth.models import UserAccount
@@ -38,8 +41,16 @@ class UserAccountRepository(BaseRepository):
         account.roles.remove(role_ids)
         return True
 
-    async def get_by_identifier(self, identifier: str) -> UserAccount:
-        return await self.model.objects.filter(identifier=identifier).afirst()
+    async def get_by_identifier(self, *args) -> Optional[UserAccount]:
+        if not args: return None
+
+        # Build Q objects with OR logic for each identifier argument
+        query = Q(identifier=args[0])
+        for identifier in args[1:]:
+            query |= Q(identifier=identifier)
+
+        result = await self.model.objects.filter(query).afirst()
+        return result
 
     async def list(
             self,

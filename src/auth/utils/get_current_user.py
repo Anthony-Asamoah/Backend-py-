@@ -33,7 +33,7 @@ async def get_current_user(
 
     # retrieve user account
     from auth.use_cases import user_account_service
-    account = await user_account_service.repo.get_by_identifier(identifier=identifier)
+    account = await user_account_service.repo.get_by_identifier(identifier)
     is_authorized = await authorize_account(account)
     if not is_authorized: raise credentials_exception
 

@@ -18,7 +18,7 @@ async def create_dispatch(
     template = notification.template
 
     payload = {
-        "notification_id": notification.id,
+        "notification_id": notification.cursor,
         "user_id": notification.user_info_id,
         "channel": channel.value if hasattr(channel, 'value') else channel,
     }

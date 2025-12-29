@@ -39,6 +39,7 @@ class NotificationDispatchBase(BaseModel):
 
 
 class NotificationDispatchRepoCreate(NotificationDispatchBase):
+    notification_id: Optional[int] = None
     user_id: int
 
 

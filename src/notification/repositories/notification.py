@@ -34,7 +34,7 @@ class NotificationRepository(BaseRepository):
             status: List[NotificationStatus] = None,
     ) -> list[Notification]:
         log.debug(f'init list notifications with skip: {skip}, limit: {limit}')
-        query = self.model.objects.all()
+        query = self.model.objects.select_related('user_info').prefetch_related('dispatches').all()
 
         if date_to: query = query.filter(created_on__lte=date_to)
         if date_from: query = query.filter(created_on__gte=date_from)

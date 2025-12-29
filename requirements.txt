@@ -1,7 +1,7 @@
 apscheduler
 argon2_cffi
 boto3
-django
+django-ninja
 django-storages
 google-cloud-storage
 fastapi
@@ -9,6 +9,7 @@ fastapi-limiter
 httpx
 humanize
 inflect
+jinja2
 moviepy
 passlib
 pendulum

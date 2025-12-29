@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ subject if subject is defined else 'System Notification' }}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: #f4f4f7;
+            color: #333;
+        }
+
+        .email-wrapper {
+            width: 100%;
+            padding: 20px;
+            background-color: #f4f4f7;
+        }
+
+        .email-content {
+            max-width: 600px;
+            margin: auto;
+            background-color: #ffffff;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .email-header {
+            background-color: #d07c00;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-logo {
+            height: 40px;
+            width: auto;
+            margin-right: 15px;
+        }
+
+        .header-text {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .email-body {
+            padding: 30px;
+        }
+
+        .email-footer {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            padding: 20px;
+        }
+
+        a {
+            color: #4a90e2;
+            text-decoration: none;
+        }
+
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .email-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007BFF;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .email-button:hover {
+            background-color: #0056b3;
+        }
+
+        .default-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="email-wrapper">
+    <div class="email-content">
+        <div class="email-header">
+            <!--            <img src="MMRA_LOGO.png" alt="Logo" class="header-logo">-->
+            <span class="header-text">
+                {{ header if header is defined else 'REDNIN' }}
+            </span>
+        </div>
+        <div class="email-body">
+            {{ body|safe }}
+
+            {% if links %}
+            <div class="button-container">
+                {% for link in links %}
+                <a href="{{ link.url }}" class="email-button" target="_blank" rel="noopener noreferrer">
+                    {{ link.label }}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="email-footer">
+            &copy; {{ _year }} REDNIN. All rights reserved.
+        </div>
+    </div>
+</div>
+</body>
+</html>

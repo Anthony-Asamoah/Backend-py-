@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'auth',
     'media',
     'user_info',
+    'notification',
 ]
 
 # Seeding and data
@@ -183,3 +184,21 @@ file_extension_mappings = {
     '.txt': 'text/plain',
 }
 ALLOWED_MIME_TYPES = file_extension_mappings.values()
+
+# Notification
+EMAIL_TEMPLATE_DIR: str = str(BASE_DIR / 'notification' / 'channels' / 'email' / 'templates')
+MAIL_SERVER: str = config('MAIL_SERVER', cast=str, default='')
+MAIL_PORT: int = config('MAIL_PORT', cast=int, default='')
+MAIL_USERNAME: str = config('MAIL_USERNAME', cast=str, default='')
+MAIL_PASSWORD: str = config('MAIL_PASSWORD', cast=str, default='')
+MAIL_FROM: str = config('MAIL_FROM', cast=str, default='')
+MAIL_USE_TLS: bool = config('MAIL_USE_TLS', cast=bool, default='')
+
+SMTP_RECIPIENTS_LIMIT: int = config('SMTP_RECIPIENTS_LIMIT', cast=int, default=100)
+SMS_IS_DEBUG: bool = config('SMS_IS_DEBUG', cast=bool, default=False)
+SMS_SENDER_NAME: str = APP_TITLE
+SMS_PROVIDER: str = 'ARKESEL'
+
+ARKESEL_BASE_URL: str = config('ARKESEL_BASE_URL', cast=str, default='https://sms.arkesel.com/api/v2')
+ARKESEL_SENDER_CHAR_LIMIT: int = 11
+ARKESEL_API_KEY: str = config('ARKESEL_API_KEY', cast=str, default='')

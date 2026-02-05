@@ -51,7 +51,7 @@ class BaseRepository(Generic[ModelType,]):
 
     async def create(self, payload: RepositoryInSchemaType) -> ModelType:
         log.debug(f'init create {self.model.__name__}')
-        return await self.model.objects.acreate(**payload.model_dump())
+        return await self.model.objects.acreate(**payload.model_dump(exclude_none=True))
 
     async def update(self, id: UUID4, payload: Union[dict, RepositoryInSchemaType]) -> Optional[ModelType]:
         log.debug(f'init update {self.model.__name__} with id: {id}')

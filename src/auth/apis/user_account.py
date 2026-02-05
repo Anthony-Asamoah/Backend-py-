@@ -24,13 +24,6 @@ user_account_router.post(
 )(user_account_service.logout)
 
 user_account_router.post(
-    "/refresh",
-    response_model=UserAccountTokens,
-    status_code=200,
-    summary="Refresh access and refresh tokens",
-)(user_account_service.refresh)
-
-user_account_router.post(
     "/activate",
     status_code=204,
     summary="Activate user account with token",
@@ -53,6 +46,16 @@ user_account_router.post(
     status_code=204,
     summary="Reset password with token",
 )(user_account_service.reset_password)
+
+# Refresh
+user_account_router.post(
+    "/refresh",
+    response_model=UserAccountTokens,
+    status_code=200,
+    summary="Refresh access and refresh tokens",
+)(user_account_service.refresh)
+
+
 
 # Public registration
 user_account_router.post(

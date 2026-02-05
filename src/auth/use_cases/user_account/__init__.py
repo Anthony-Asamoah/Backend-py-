@@ -19,6 +19,7 @@ from auth.utils import get_current_user
 from main import settings
 from main.utils.base_classes import BaseService
 from .activate_account import activate_account
+from .assign_roles import assign_roles
 from .change_password import change_password
 from .create_account import create_account
 from .delete_account import delete_account
@@ -28,6 +29,7 @@ from .list_accounts import list_accounts
 from .login import login
 from .logout import logout
 from .refresh_token import get_new_access_tokens
+from .remove_roles import remove_roles
 from .reset_password import reset_password
 from .reset_password_request import reset_password_request
 from ...repositories import user_account_repo
@@ -46,7 +48,11 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
         """Expire a session."""
         return await logout(self, credentials.credentials)
 
-    async def refresh(self, payload: RefreshToken):
+    async def refresh(
+            self,
+            payload: RefreshToken,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
+    ):
         """Refresh a set of tokens."""
         return await get_new_access_tokens(self, payload)
 
@@ -87,11 +93,27 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
         """activate an account."""
         await reset_password(self, payload, tasks)
 
-    async def assign_roles(self, id: UUID4, role_ids: List[UUID4]) -> None:
-        return await user_account_repo.assign_roles(id, role_ids)
+    async def assign_roles(
+            self,
+            id: UUID4,
+            role_ids: List[UUID4],
+            tasks: BackgroundTasks,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
+    ) -> None:
+        """Assign roles to a user account."""
+        assigned_by_name = f"{current_user.first_name} {current_user.last_name}".strip() if current_user else "Administrator"
+        return await assign_roles(self, id, role_ids, tasks, assigned_by_name)
 
-    async def remove_roles(self, id: UUID4, role_ids: List[UUID4]) -> None:
-        return await user_account_repo.remove_roles(id, role_ids)
+    async def remove_roles(
+            self,
+            id: UUID4,
+            role_ids: List[UUID4],
+            tasks: BackgroundTasks,
+            current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
+    ) -> None:
+        """Remove roles from a user account."""
+        removed_by_name = f"{current_user.first_name} {current_user.last_name}".strip() if current_user else "Administrator"
+        return await remove_roles(self, id, role_ids, tasks, removed_by_name)
 
     async def read(
             self, *,
@@ -108,10 +130,11 @@ class UserAccountService(BaseService[UserAccount, UserAccountOut]):
     async def delete(
             self,
             id: UUID4,
+            tasks: BackgroundTasks,
             current_user: Annotated[CurrentAccountPayload, Depends(get_current_user)] = None,
     ) -> None:
         """Delete by user ID."""
-        return await delete_account(self, id)
+        return await delete_account(self, id, tasks)
 
     async def get(
             self,

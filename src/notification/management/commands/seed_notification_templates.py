@@ -156,4 +156,95 @@ class Command(BaseCommand):
                 """,
                 "short_content": "Your password was changed at {{change_time}}. If this wasn't you, contact {{support_email}} immediately."
             },
+
+            # 5. Account Deleted Template
+            {
+                "name": "ACCOUNT-DELETED",
+                "subject": "Your {{platform_name}} Account Has Been Deleted",
+                "heading": "Account Deletion Confirmation",
+                "email_content": """
+                    <p>Hi <strong>{{user_name}}</strong>,</p>
+
+                    <p>This is to confirm that your <strong>{{platform_name}}</strong> account has been deleted on <strong>{{deletion_date}}</strong>.</p>
+
+                    <p><strong>Data Retention:</strong></p>
+                    <ul>
+                        <li>Your personal data will be removed according to our privacy policy</li>
+                        <li>Some anonymized data may be retained for legal and analytical purposes</li>
+                        <li>Deletion will be completed within 30 days</li>
+                    </ul>
+
+                    <div style="padding: 15px; background-color: #f8d7da; border-left: 4px solid #dc3545; border-radius: 5px; margin: 20px 0;">
+                        <strong>⚠️ Didn't request account deletion?</strong><br>
+                        Contact us immediately at: <strong>{{support_email}}</strong>
+                    </div>
+
+                    <p>If you change your mind, you may be able to recover your account within the next 30 days by contacting support.</p>
+
+                    <p>We're sorry to see you go. If you have any feedback about your experience, we'd love to hear from you.</p>
+
+                    <p>Best regards,<br>The {{platform_name}} Team</p>
+                """,
+                "short_content": "Your account was deleted on {{deletion_date}}. Contact {{support_email}} if this wasn't you."
+            },
+
+            # 6. Role Assigned Template
+            {
+                "name": "ROLE-ASSIGNED",
+                "subject": "New Roles Assigned - {{platform_name}}",
+                "heading": "Your Permissions Have Been Updated",
+                "email_content": """
+                    <p>Hi <strong>{{user_name}}</strong>,</p>
+
+                    <p>Your account permissions on <strong>{{platform_name}}</strong> have been updated.</p>
+
+                    <p><strong>New Roles Assigned:</strong></p>
+                    <div style="padding: 15px; background-color: #d4edda; border-left: 4px solid #28a745; border-radius: 5px; margin: 20px 0;">
+                        {{roles_assigned}}
+                    </div>
+
+                    <p><strong>What this means:</strong></p>
+                    <p>{{responsibilities}}</p>
+
+                    <p><strong>Assigned by:</strong> {{assigned_by}}</p>
+                    <p><strong>Date:</strong> {{assignment_date}}</p>
+
+                    <p>With these new roles, you now have access to additional features and capabilities on the platform. Please review your new permissions and reach out if you have any questions.</p>
+
+                    <p>If you believe this change was made in error, please contact your administrator or our support team.</p>
+
+                    <p>Best regards,<br>The {{platform_name}} Team</p>
+                """,
+                "short_content": "New roles assigned: {{roles_assigned}} by {{assigned_by}}."
+            },
+
+            # 7. Role Removed Template
+            {
+                "name": "ROLE-REMOVED",
+                "subject": "Roles Removed - {{platform_name}}",
+                "heading": "Your Permissions Have Changed",
+                "email_content": """
+                    <p>Hi <strong>{{user_name}}</strong>,</p>
+
+                    <p>Your account permissions on <strong>{{platform_name}}</strong> have been updated.</p>
+
+                    <p><strong>Roles Removed:</strong></p>
+                    <div style="padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px; margin: 20px 0;">
+                        {{roles_removed}}
+                    </div>
+
+                    <p><strong>Impact:</strong></p>
+                    <p>{{impact_explanation}}</p>
+
+                    <p><strong>Removed by:</strong> {{removed_by}}</p>
+                    <p><strong>Date:</strong> {{removal_date}}</p>
+
+                    <p>Some features and capabilities may no longer be accessible with your current permissions. If you need access to these features, please contact your administrator.</p>
+
+                    <p>If you believe this change was made in error, please contact your administrator or our support team immediately.</p>
+
+                    <p>Best regards,<br>The {{platform_name}} Team</p>
+                """,
+                "short_content": "Roles removed: {{roles_removed}} by {{removed_by}}."
+            },
         ]

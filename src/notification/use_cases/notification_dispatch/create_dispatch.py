@@ -13,7 +13,7 @@ async def create_dispatch(
         context: Optional[Dict[str, Any]] = None,
         links: Optional[List[DispatchLinkSchema]] = None,
 ) -> NotificationDispatchOut:
-    log.info(f'init create_dispatch for notification: {notification.id}, channel: {channel}')
+    log.debug(f'init create_dispatch for notification: {notification.id}, channel: {channel}')
 
     template = notification.template
 

@@ -28,12 +28,12 @@ class UserAccountBase(BaseModel):
     identifier: RequiredStr
 
     class Config:
-        from_attributes = True
-        exclude_unset = True
+        exclude_none = True
 
 
 class UserAccountRepoCreate(UserAccountBase):
     id: Optional[UUID4] = None
+    password: RequiredStr
 
 
 class UserAccountOut(BaseOutSchema, UserAccountBase):
